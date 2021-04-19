@@ -1,0 +1,7 @@
+{
+  "name": "burakmanager",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
