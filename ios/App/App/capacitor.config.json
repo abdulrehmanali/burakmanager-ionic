@@ -1,0 +1,16 @@
+{
+  "appId": "com.asittech.burakmanager",
+  "appName": "Burakmanager",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {},
+  "ios": {
+    "cordovaLinkerFlags": ["-ObjC"]
+  }
+}

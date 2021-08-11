@@ -1,28 +1,46 @@
 <template>
   <IonApp>
-    <IonSplitPane content-id="main-content">
+    <ion-router-outlet
+      v-if="!$router.meta?.haveSideBar"
+      id="main-content"
+    ></ion-router-outlet>
+    <IonSplitPane v-if="$route.meta.haveSideBar" content-id="main-content">
       <ion-menu content-id="main-content" type="overlay">
         <ion-content>
           <ion-list id="inbox-list">
-            <ion-list-header>Inbox</ion-list-header>
-            <ion-note>hi@ionicframework.com</ion-note>
-  
+            <ion-list-header>Abdul Rehman</ion-list-header>
+            <ion-note>Home Office</ion-note>
+
             <ion-menu-toggle auto-hide="false" v-for="(p, i) in appPages" :key="i">
-              <ion-item @click="selectedIndex = i" router-direction="root" :router-link="p.url" lines="none" detail="false" class="hydrated" :class="{ selected: selectedIndex === i }">
+              <ion-item
+                router-direction="root"
+                :router-link="p.url"
+                lines="none"
+                detail="false"
+                class="hydrated"
+                :class="{ selected: p.url === router.fullPath }"
+              >
                 <ion-icon slot="start" :ios="p.iosIcon" :md="p.mdIcon"></ion-icon>
                 <ion-label>{{ p.title }}</ion-label>
               </ion-item>
             </ion-menu-toggle>
           </ion-list>
-  
-          <ion-list id="labels-list">
-            <ion-list-header>Labels</ion-list-header>
-  
-            <ion-item v-for="(label, index) in labels" lines="none" :key="index">
-              <ion-icon slot="start" :ios="bookmarkOutline" :md="bookmarkSharp"></ion-icon>
-              <ion-label>{{ label }}</ion-label>
-            </ion-item>
-          </ion-list>
+          <ion-item>
+            <ion-label>Selected Shop</ion-label>
+            <ion-select
+              placeholder="Select One"
+              :value="selectedShop"
+              @ionChange="selectShop($event)"
+            >
+              <ion-select-option value="wqw">qwq</ion-select-option>
+              <ion-select-option
+                v-for="(shop, key) in user.shops"
+                :key="key"
+                :value="key"
+                >{{ shop }}</ion-select-option
+              >
+            </ion-select>
+          </ion-item>
         </ion-content>
       </ion-menu>
       <ion-router-outlet id="main-content"></ion-router-outlet>
@@ -31,97 +49,128 @@
 </template>
 
 <script lang="ts">
-import { IonApp, IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, IonMenu, IonMenuToggle, IonNote, IonRouterOutlet, IonSplitPane } from '@ionic/vue';
-import { defineComponent, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { archiveOutline, archiveSharp, bookmarkOutline, bookmarkSharp, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
-
+import {
+  IonApp,
+  IonContent,
+  IonIcon,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonListHeader,
+  IonMenu,
+  IonMenuToggle,
+  IonNote,
+  IonRouterOutlet,
+  IonSplitPane,
+} from "@ionic/vue";
+import { defineComponent, reactive, toRefs } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import {
+  cardOutline,
+  cardSharp,
+  readerOutline,
+  readerSharp,
+  homeOutline,
+  homeSharp,
+  cubeOutline,
+  cubeSharp,
+  storefrontOutline,
+  storefrontSharp,
+} from "ionicons/icons";
+import { db, auth } from "./main";
+import { AppPreferences } from "@ionic-native/app-preferences";
 export default defineComponent({
-  name: 'App',
+  name: "App",
   components: {
-    IonApp, 
-    IonContent, 
-    IonIcon, 
-    IonItem, 
-    IonLabel, 
-    IonList, 
-    IonListHeader, 
-    IonMenu, 
-    IonMenuToggle, 
-    IonNote, 
-    IonRouterOutlet, 
+    IonApp,
+    IonContent,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonListHeader,
+    IonMenu,
+    IonMenuToggle,
+    IonNote,
+    IonRouterOutlet,
     IonSplitPane,
   },
   setup() {
-    const selectedIndex = ref(0);
+    AppPreferences.fetch("selected_shop");
+    const state = reactive({
+      user: {},
+      selectedShop: localStorage.selectedShop,
+    });
     const appPages = [
       {
-        title: 'Inbox',
-        url: '/folder/Inbox',
-        iosIcon: mailOutline,
-        mdIcon: mailSharp
+        title: "Home",
+        url: "/",
+        iosIcon: homeOutline,
+        mdIcon: homeSharp,
       },
       {
-        title: 'Outbox',
-        url: '/folder/Outbox',
-        iosIcon: paperPlaneOutline,
-        mdIcon: paperPlaneSharp
+        title: "Shops",
+        url: "/shops",
+        iosIcon: storefrontOutline,
+        mdIcon: storefrontSharp,
       },
       {
-        title: 'Favorites',
-        url: '/folder/Favorites',
-        iosIcon: heartOutline,
-        mdIcon: heartSharp
+        title: "Products",
+        url: "/products",
+        iosIcon: cubeOutline,
+        mdIcon: cubeSharp,
       },
       {
-        title: 'Archived',
-        url: '/folder/Archived',
-        iosIcon: archiveOutline,
-        mdIcon: archiveSharp
+        title: "Ledger",
+        url: "/ledger",
+        iosIcon: readerOutline,
+        mdIcon: readerSharp,
       },
       {
-        title: 'Trash',
-        url: '/folder/Trash',
-        iosIcon: trashOutline,
-        mdIcon: trashSharp
+        title: "Checkout",
+        url: "/checkout",
+        iosIcon: cardOutline,
+        mdIcon: cardSharp,
       },
-      {
-        title: 'Spam',
-        url: '/folder/Spam',
-        iosIcon: warningOutline,
-        mdIcon: warningSharp
-      }
     ];
-    const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-    
-    const path = window.location.pathname.split('folder/')[1];
-    if (path !== undefined) {
-      selectedIndex.value = appPages.findIndex(page => page.title.toLowerCase() === path.toLowerCase());
+    const router = useRouter();
+
+    if (auth.currentUser) {
+      db.collection("users")
+        .doc(auth.currentUser?.uid)
+        .onSnapshot((doc) => {
+          state.user = doc.data() || {};
+          if (!doc.data()?.shops) {
+            router.push("/shops/new");
+          } else {
+            if (!localStorage.selectedShop) {
+              state.selectedShop = Object.keys(doc.data()?.shops)[0];
+              localStorage.selctedShop = Object.keys(doc.data()?.shops)[0];
+            }
+          }
+        });
     }
-    
-    const route = useRoute();
-    
-    return { 
-      selectedIndex,
-      appPages, 
-      labels,
-      archiveOutline, 
-      archiveSharp, 
-      bookmarkOutline, 
-      bookmarkSharp, 
-      heartOutline, 
-      heartSharp, 
-      mailOutline, 
-      mailSharp, 
-      paperPlaneOutline, 
-      paperPlaneSharp, 
-      trashOutline, 
-      trashSharp, 
-      warningOutline, 
-      warningSharp,
-      isSelected: (url: string) => url === route.path ? 'selected' : ''
-    }
-  }
+    const selectShop = (e: Event & { target: HTMLInputElement }) => {
+      console.log(e.target.value);
+    };
+
+    return {
+      ...toRefs(state),
+      selectShop,
+      appPages,
+      cardOutline,
+      cardSharp,
+      readerOutline,
+      readerSharp,
+      homeOutline,
+      homeSharp,
+      cubeOutline,
+      cubeSharp,
+      storefrontOutline,
+      storefrontSharp,
+      router,
+    };
+  },
 });
 </script>
 

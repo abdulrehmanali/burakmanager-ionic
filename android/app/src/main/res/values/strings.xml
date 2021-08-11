@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BurakManager</string>
+    <string name="title_activity_main">BurakManager</string>
+    <string name="package_name">com.asittech.burakmanager</string>
+    <string name="custom_url_scheme">com.asittech.burakmanager</string>
+</resources>

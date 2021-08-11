@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "365604377376",
+    "firebase_url": "https://burakmanager-default-rtdb.firebaseio.com",
+    "project_id": "burakmanager",
+    "storage_bucket": "burakmanager.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365604377376:android:fba6efaace44ca91873d45",
+        "android_client_info": {
+          "package_name": "com.asittech.burakmanager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "365604377376-38jiq3o45l5a23bt9bnqi53bgfvkvcqr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDg3qdELIiGrCDc8FvJvRcOSNYUOPbyX0g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "365604377376-38jiq3o45l5a23bt9bnqi53bgfvkvcqr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

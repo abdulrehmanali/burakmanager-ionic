@@ -1,6 +1,6 @@
 {
-  "appId": "io.ionic.starter",
-  "appName": "burakmanager",
+  "appId": "com.asittech.burakmanager",
+  "appName": "BurakManager",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "dist",
@@ -9,5 +9,8 @@
       "launchShowDuration": 0
     }
   },
-  "cordova": {}
+  "cordova": {},
+  "ios": {
+    "cordovaLinkerFlags": ["-ObjC"]
+  }
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>365604377376-ripfbfo0mlfhghsg9jl69uams19k747s.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.365604377376-ripfbfo0mlfhghsg9jl69uams19k747s</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBdes7_USJVtnQr4xM8pNXFZXcBCriJLjc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>365604377376</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.asittech.burakmanager</string>
+	<key>PROJECT_ID</key>
+	<string>burakmanager</string>
+	<key>STORAGE_BUCKET</key>
+	<string>burakmanager.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:365604377376:ios:63bafa3df5f33b98873d45</string>
+	<key>DATABASE_URL</key>
+	<string>https://burakmanager-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>
