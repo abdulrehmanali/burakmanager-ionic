@@ -42,6 +42,36 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import ('../views/products/New.vue'),
     meta:{requiresAuth:true}
   },
+  {
+    path: '/products/:sku',
+    component: () => import ('../views/products/Edit.vue'),
+    meta:{requiresAuth:true}
+  },
+  {
+    path: '/customers',
+    component: () => import ('../views/customers/Index.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
+    path: '/customers/new',
+    component: () => import ('../views/customers/New.vue'),
+    meta:{requiresAuth:true}
+  },
+  {
+    path: '/customers/:id',
+    component: () => import ('../views/customers/Edit.vue'),
+    meta:{requiresAuth:true}
+  },
+  {
+    path: '/ledger',
+    component: () => import ('../views/ledger/Index.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
+    path: '/ledger/new',
+    component: () => import ('../views/ledger/New.vue'),
+    meta:{requiresAuth:true}
+  },
 ]
 
 const router = createRouter({

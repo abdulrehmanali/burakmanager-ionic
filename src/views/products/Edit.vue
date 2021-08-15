@@ -3,9 +3,9 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button default-href="/products"></ion-back-button>
         </ion-buttons>
-        <ion-title>New Shop</ion-title>
+        <ion-title>Edit Shop</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -17,14 +17,14 @@
           <ion-card-content>
             <form
               @submit.prevent="
-                createNewProduct(
-                  name,
-                  price,
-                  sku,
-                  salePrice,
-                  stockQuantity,
-                  onSale,
-                  inventoryEnabled
+                saveProduct(
+                  product.name,
+                  product.price,
+                  product.sku,
+                  product.salePrice,
+                  product.stockQuantity,
+                  product.onSale,
+                  product.inventoryEnable
                 )
               "
             >
@@ -34,8 +34,9 @@
                     <ion-item>
                       <ion-label position="floating">Name*</ion-label>
                       <ion-input
-                        v-model="name"
-                        @input="name = $event.target.value"
+                        v-model="product.name"
+                        :value="product.name"
+                        @input="product.name = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
@@ -45,8 +46,9 @@
                     <ion-item>
                       <ion-label position="floating">Price*</ion-label>
                       <ion-input
-                        v-model="price"
-                        @input="price = $event.target.value"
+                        v-model="product.price"
+                        :value="product.price"
+                        @input="product.price = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
@@ -56,8 +58,9 @@
                     <ion-item>
                       <ion-label position="floating">SKU*</ion-label>
                       <ion-input
-                        v-model="sku"
-                        @input="sku = $event.target.value"
+                        v-model="product.sku"
+                        :value="product.sku"
+                        @input="product.sku = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
@@ -72,8 +75,9 @@
                     <ion-item>
                       <ion-label position="floating">Sale Price*</ion-label>
                       <ion-input
-                        v-model="salePrice"
-                        @input="salePrice = $event.target.value"
+                        v-model="product.salePrice"
+                        :value="product.salePrice"
+                        @input="product.salePrice = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
@@ -81,9 +85,9 @@
                     <ion-item>
                       <ion-label>On Sale</ion-label>
                       <ion-toggle
-                        value="true"
-                        v-model="onSale"
-                        @input="onSale = $event.target.value"
+                        :checked="product.onSale"
+                        v-model="product.onSale"
+                        @input="product.onSale = $event.target.value"
                       />
                     </ion-item>
                   </ion-col>
@@ -93,20 +97,25 @@
                     <ion-item>
                       <ion-label position="floating">Quantity</ion-label>
                       <ion-input
-                        v-model="stockQuantity"
-                        @input="stockQuantity = $event.target.value"
+                        v-model="product.stockQuantity"
+                        :value="product.stockQuantity"
+                        @input="product.stockQuantity = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
                   <ion-col>
                     <ion-item>
                       <ion-label>Metered</ion-label>
-                      <ion-toggle value="metered" />
+                      <ion-toggle
+                        v-model="product.inventoryEnable"
+                        :checked="product.inventoryEnable"
+                        @input="product.inventoryEnable = $event.target.value"
+                      />
                     </ion-item>
                   </ion-col>
                 </ion-row>
               </ion-grid>
-              <ion-button expand="block" type="submit">Create</ion-button>
+              <ion-button expand="block" type="submit">Save</ion-button>
             </form>
           </ion-card-content>
         </ion-card>
@@ -126,22 +135,21 @@ import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
 import { auth, db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
+import { useRoute, useRouter } from "vue-router";
 
 export default {
-  name: "NewProduct",
+  name: "EditProduct",
   components: {
     IonContent,
     IonPage,
   },
   setup() {
+    const route = useRoute();
+    const { sku } = route.params;
     const state = reactive({
-      name: "",
-      price: "",
-      sku: "",
-      salePrice: "",
-      stockQuantity: "",
-      onSale: "",
-      inventoryEnabled: "",
+      product: {
+        sku: "",
+      },
       errorMsg: "",
     });
     const openScanner = async () => {
@@ -153,7 +161,7 @@ export default {
             const scanSub = QRScanner.scan().subscribe((text: string) => {
               QRScanner.hide(); // hide camera preview
               scanSub.unsubscribe(); // stop scanning
-              state.sku = text;
+              state.product.sku = text;
             });
           } else if (status.denied) {
             alert("Please give camera permission");
@@ -167,14 +175,29 @@ export default {
         })
         .catch((e: any) => alert(e));
     };
-    const createNewProduct = async (
+
+    const getProduct = async (sku: any) => {
+      try {
+        const product = await db
+          .collection("shops")
+          .doc(localStorage.selectedShop)
+          .collection("products")
+          .doc(sku)
+          .get();
+        state.product = product.data() as any;
+      } catch (error) {
+        state.errorMsg = error.message;
+      }
+    };
+
+    const saveProduct = async (
       name: string,
       price: string,
       sku: string,
       salePrice: string,
       stockQuantity: string,
-      onSale: boolean,
-      inventoryEnabled: boolean
+      onSale = false,
+      inventoryEnabled = false
     ) => {
       try {
         await db
@@ -182,11 +205,8 @@ export default {
           .doc(localStorage.selectedShop)
           .collection("products")
           .doc(sku)
-          .set({
-            createdAt: new Date().getTime(),
+          .update({
             lastUpdatedAt: new Date().getTime(),
-            expiryAt: null,
-            formatedExpiry: null,
             inventoryEnable: inventoryEnabled,
             name: name,
             onSale: onSale,
@@ -194,14 +214,14 @@ export default {
             salePrice: parseInt(salePrice),
             sku: sku,
             stockQuantity: parseInt(stockQuantity),
-            weight: null,
           });
-        router.push("/products");
+        router.back();
       } catch (error) {
         state.errorMsg = error.message;
       }
     };
-    return { ...toRefs(state), openScanner, createNewProduct };
+    getProduct(sku.toString());
+    return { ...toRefs(state), openScanner, saveProduct, router };
   },
 };
 </script>

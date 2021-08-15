@@ -32,7 +32,6 @@
               :value="selectedShop"
               @ionChange="selectShop($event)"
             >
-              <ion-select-option value="wqw">qwq</ion-select-option>
               <ion-select-option
                 v-for="(shop, key) in user.shops"
                 :key="key"
@@ -121,16 +120,16 @@ export default defineComponent({
         mdIcon: cubeSharp,
       },
       {
-        title: "Ledger",
-        url: "/ledger",
+        title: "Customers",
+        url: "/customers",
         iosIcon: readerOutline,
         mdIcon: readerSharp,
       },
       {
-        title: "Checkout",
-        url: "/checkout",
-        iosIcon: cardOutline,
-        mdIcon: cardSharp,
+        title: "Ledger",
+        url: "/ledger",
+        iosIcon: readerOutline,
+        mdIcon: readerSharp,
       },
     ];
     const router = useRouter();
@@ -145,7 +144,7 @@ export default defineComponent({
           } else {
             if (!localStorage.selectedShop) {
               state.selectedShop = Object.keys(doc.data()?.shops)[0];
-              localStorage.selctedShop = Object.keys(doc.data()?.shops)[0];
+              localStorage.selectedShop = Object.keys(doc.data()?.shops)[0];
             }
           }
         });

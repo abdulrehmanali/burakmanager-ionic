@@ -5,29 +5,26 @@
         <ion-buttons slot="start">
           <ion-menu-button color="primary"></ion-menu-button>
         </ion-buttons>
-        <ion-title>Products</ion-title>
+        <ion-title>Ledger</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-searchbar></ion-searchbar>
       <ion-list>
         <ion-item
-          v-for="(product, key) in products"
+          v-for="(customer, key) in customers"
           :key="key"
           :value="key"
           v-on:click="router.push('/products/' + product.sku)"
         >
           <ion-label>
-            <h2>{{ product.name }}</h2>
-            <p>{{ product.stockQuantity }} items remaining</p>
+            <h2>{{ customer.name }}</h2>
+            <h4>{{ customer.contactNumber }}</h4>
           </ion-label>
-          <ion-note slot="end">
-            <h4>{{ product.price }} Rs</h4>
-          </ion-note>
         </ion-item>
       </ion-list>
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button href="/products/new">
+        <ion-fab-button href="/customers/new">
           <ion-icon :icon="add"></ion-icon>
         </ion-fab-button>
       </ion-fab>
@@ -43,22 +40,22 @@ import { db } from "@/main";
 import { reactive, toRefs } from "@vue/reactivity";
 
 export default {
-  name: "Products",
+  name: "Customers",
   setup() {
     const router = useRouter();
     const state = reactive({
-      products: [],
+      customers: [],
     });
     db.collection("shops")
       .doc(localStorage.selectedShop)
-      .collection("products")
+      .collection("customers")
       .onSnapshot((doc) => {
         const result = [] as any;
         doc.docs.map((e) => {
           result.push(e.data());
         });
         console.log(result);
-        state.products = result;
+        state.customers = result;
       });
     return { ...toRefs(state), router, add };
   },
