@@ -1,5 +1,7 @@
 <template>
   <ion-page>
+    <h1>Select Type</h1>
+    <br />
     <ion-tabs @ionTabsWillChange="beforeTabChange" @ionTabsDidChange="afterTabChange">
       <ion-tab-bar slot="top">
         <ion-tab-button tab="products" v-on:click="changeType('products')">
@@ -17,11 +19,11 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
 import { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs } from "@ionic/vue";
 import { calendar, personCircle } from "ionicons/icons";
 
-export default defineComponent({
+export default {
+  name: "SelectType",
   components: { IonIcon, IonLabel, IonPage, IonTabBar, IonTabButton, IonTabs },
   setup() {
     const beforeTabChange = () => {
@@ -41,5 +43,10 @@ export default defineComponent({
       changeType,
     };
   },
-});
+};
 </script>
+<style>
+ion-tabs {
+  margin-top: 80px;
+}
+</style>

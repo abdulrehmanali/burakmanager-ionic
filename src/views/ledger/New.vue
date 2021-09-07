@@ -7,20 +7,19 @@
         </ion-buttons>
         <ion-title>New Entry</ion-title>
       </ion-toolbar>
+      <ion-segment @ionChange="typeChanged($event)" value="product">
+        <ion-segment-button value="product" :layout="iconTop" selected>
+          <ion-icon :icon="cube"></ion-icon>
+          <ion-label>Products</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="cash" :layout="iconTop">
+          <ion-icon :icon="cash"></ion-icon>
+          <ion-label>Cash</ion-label>
+        </ion-segment-button>
+      </ion-segment>
     </ion-header>
     <ion-content :fullscreen="true">
       <div id="container">
-        <ion-slides pager="true">
-          <ion-slide>
-            <h1>Slide 1</h1>
-          </ion-slide>
-          <ion-slide>
-            <h1>Slide 2</h1>
-          </ion-slide>
-          <ion-slide>
-            <h1>Slide 3</h1>
-          </ion-slide>
-        </ion-slides>
         <ion-card>
           <ion-card-content v-if="errorMsg" class="error-message">
             {{ errorMsg }}
@@ -72,18 +71,22 @@ export default {
         state.errorMsg = error.message;
       }
     };
-    return { ...toRefs(state), createNewCustomer };
+    const typeChanged = ($even: Event) => {
+      console.log($even.returnValue);
+    };
+    return { ...toRefs(state), createNewCustomer, typeChanged };
   },
 };
 </script>
 
 <style scoped>
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+ion-slides {
+  min-height: 100vh;
+  width: auto;
+}
+
+ion-slide {
+  min-height: 100vh;
+  width: auto;
 }
 </style>
