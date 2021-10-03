@@ -24,7 +24,8 @@
                   salePrice,
                   stockQuantity,
                   onSale,
-                  inventoryEnabled
+                  inventoryEnabled,
+                  measurementUnit
                 )
               "
             >
@@ -100,8 +101,12 @@
                   </ion-col>
                   <ion-col>
                     <ion-item>
-                      <ion-label>Metered</ion-label>
-                      <ion-toggle value="metered" />
+                      <ion-label>Measurement Unit</ion-label>
+                      <ion-select v-model="measurementUnit" @change="measurementUnit = $event.target.value" ok-text="Okay" cancel-text="Dismiss">
+                        <ion-select-option value="piece">Piece</ion-select-option>
+                        <ion-select-option value="liter">Liter</ion-select-option>
+                        <ion-select-option value="ml">Ml</ion-select-option>
+                      </ion-select>
                     </ion-item>
                   </ion-col>
                 </ion-row>
@@ -143,6 +148,7 @@ export default {
       onSale: "",
       inventoryEnabled: "",
       errorMsg: "",
+      measurementUnit: "",
     });
     const openScanner = async () => {
       QRScanner.prepare()
@@ -174,7 +180,8 @@ export default {
       salePrice: string,
       stockQuantity: string,
       onSale: boolean,
-      inventoryEnabled: boolean
+      inventoryEnabled: boolean,
+      measurementUnit: string
     ) => {
       try {
         await db
@@ -195,6 +202,7 @@ export default {
             sku: sku,
             stockQuantity: parseInt(stockQuantity),
             weight: null,
+            measurementUnit:measurementUnit
           });
         router.push("/products");
       } catch (error) {

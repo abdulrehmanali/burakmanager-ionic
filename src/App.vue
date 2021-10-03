@@ -120,6 +120,12 @@ export default defineComponent({
         mdIcon: cubeSharp,
       },
       {
+        title: "Production Products",
+        url: "/production-products/new",
+        iosIcon: cubeOutline,
+        mdIcon: cubeSharp,
+      },
+      {
         title: "Customers",
         url: "/customers",
         iosIcon: readerOutline,

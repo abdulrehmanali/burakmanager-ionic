@@ -24,7 +24,8 @@
                   product.salePrice,
                   product.stockQuantity,
                   product.onSale,
-                  product.inventoryEnable
+                  product.inventoryEnable,
+                  product.measurementUnit
                 )
               "
             >
@@ -105,12 +106,12 @@
                   </ion-col>
                   <ion-col>
                     <ion-item>
-                      <ion-label>Metered</ion-label>
-                      <ion-toggle
-                        v-model="product.inventoryEnable"
-                        :checked="product.inventoryEnable"
-                        @input="product.inventoryEnable = $event.target.value"
-                      />
+                      <ion-label>Measurement Unit</ion-label>
+                      <ion-select v-model="product.measurementUnit" @change="product.measurementUnit = $event.target.value" ok-text="Okay" cancel-text="Dismiss">
+                        <ion-select-option value="piece">Piece</ion-select-option>
+                        <ion-select-option value="liter">Liter</ion-select-option>
+                        <ion-select-option value="ml">Ml</ion-select-option>
+                      </ion-select>
                     </ion-item>
                   </ion-col>
                 </ion-row>
@@ -197,7 +198,8 @@ export default {
       salePrice: string,
       stockQuantity: string,
       onSale = false,
-      inventoryEnabled = false
+      inventoryEnabled = false,
+      measurementUnit: string
     ) => {
       try {
         await db
@@ -214,6 +216,7 @@ export default {
             salePrice: parseInt(salePrice),
             sku: sku,
             stockQuantity: parseInt(stockQuantity),
+            measurementUnit: measurementUnit
           });
         router.back();
       } catch (error) {

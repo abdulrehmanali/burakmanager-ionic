@@ -48,6 +48,16 @@ const routes: Array<RouteRecordRaw> = [
     meta:{requiresAuth:true}
   },
   {
+    path: '/production-products',
+    component: () => import ('../views/productionCapicity/Index.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
+    path: '/production-products/new',
+    component: () => import ('../views/productionCapicity/New.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
     path: '/customers',
     component: () => import ('../views/customers/Index.vue'),
     meta:{haveSideBar:true,requiresAuth:true}
