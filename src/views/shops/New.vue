@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button defaultHref="/shops"/>
         </ion-buttons>
         <ion-title>New Shop</ion-title>
       </ion-toolbar>
@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from "@ionic/vue";
+import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
 import { reactive, toRefs } from "@vue/reactivity";
 import { auth, db } from "@/main";
 import { useRouter } from "vue-router";
@@ -59,8 +59,12 @@ export default {
       errorMsg: "",
     });
     const createNewShop = async (name: string, address: string) => {
-      const users: any = [];
-      users[auth.currentUser?.uid || ""] = {
+      const users: any = {};
+      const currentUserId = auth.currentUser?.uid || "";
+      if(!currentUserId){
+        state.errorMsg = "Unexpected Error!!. Please Try to logout and login again";
+      }
+      users[currentUserId] = {
         canAccessStats: true,
         canCheckout: true,
         canCreateNewProducts: true,
@@ -70,22 +74,23 @@ export default {
       };
       try {
         const shop = await db.collection("shops").add({
-          admin: auth.currentUser?.uid,
+          admin: currentUserId,
           createdAt: new Date().getTime(),
           lastUpdatedAt: new Date().getTime(),
           name,
           address,
           users,
         });
-
-        const shops: any = [];
-        shops[shop.id] = name;
-        await db.collection("users").doc(auth.currentUser?.uid).update({
+        
+        const currentUser = await db.collection("users").doc(currentUserId).get()
+        const shops: any = currentUser.data()?.shops || {};
+        shops[shop.id] = name; 
+        await db.collection("users").doc(currentUserId).update({
           shops,
         });
-        router.push("/");
-      } catch (error) {
-        state.errorMsg = error.message;
+        location.href = "/";
+      } catch (el) {
+        state.errorMsg = el.message;
       }
     };
 
@@ -98,6 +103,7 @@ export default {
   components: {
     IonContent,
     IonPage,
+    IonBackButton
   },
 };
 </script>

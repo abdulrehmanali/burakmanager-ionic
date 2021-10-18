@@ -12,13 +12,13 @@
       <div id="container">
         <ion-card>
           <ion-card-header>
-            <ion-row>
+            <ion-row class="ion-align-items-start">
               <ion-col>
-                <ion-card-title>Products Required in Production</ion-card-title>
+                <ion-card-title style="margin:10px 0px;">Products Required in Production</ion-card-title>
               </ion-col>
               <ion-col>
                 <ion-button @click="openSelectProductModal"
-                  >Select Product</ion-button
+                  class="ion-float-end">Select Product</ion-button
                 >
               </ion-col>
             </ion-row>
@@ -65,7 +65,7 @@
             <ion-grid>
               <ion-row>
                 <ion-col>
-                  <h2>{{ product.name }}</h2>
+                  <h2 style="margin:13px 0 0 0;">{{ product.name }}</h2>
                 </ion-col>
                 <ion-col>
                   <ion-input
@@ -77,11 +77,11 @@
                       selectedProducts[key].quantityRequiredForOneProduct =
                         $event.target.value
                     "
-                    style="width:100%"
+                    style="min-width:100%"
                   ></ion-input>
                 </ion-col>
                 <ion-col>
-                  <ion-label>{{ product.measurementUnit }}</ion-label>
+                  <h3 style="margin:13px 0 0 0;">{{ product.measurementUnit }}</h3>
                 </ion-col>
               </ion-row>
             </ion-grid>
@@ -95,8 +95,8 @@
             </ion-row>
           </ion-card-header>
           <ion-card-content>
-            <ion-button @click="calculateProducts">Calculate</ion-button>
-            <ion-note>Max Product generation capicity {{maxProducibleProducts}}</ion-note>
+            <h2>Max Product generation capicity: <strong>{{maxProducibleProducts}}</strong></h2>
+            <ion-button @click="calculateProducts" style="display:block">Calculate</ion-button>
           </ion-card-content>
         </ion-card>
         <ion-card>

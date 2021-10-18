@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/products"></ion-back-button>
+          <ion-back-button />
         </ion-buttons>
         <ion-title>Edit Shop</ion-title>
       </ion-toolbar>
@@ -131,7 +131,7 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from "@ionic/vue";
+import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
 import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
 import { auth, db } from "@/main";
 import router from "@/router";
@@ -143,6 +143,7 @@ export default {
   components: {
     IonContent,
     IonPage,
+    IonBackButton
   },
   setup() {
     const route = useRoute();

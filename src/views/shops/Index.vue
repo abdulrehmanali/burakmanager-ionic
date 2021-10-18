@@ -15,18 +15,6 @@
         <ion-card-header>
           <ion-card-title>{{ name }}</ion-card-title>
         </ion-card-header>
-        <!-- <ion-card-content>
-          <ion-list>
-            <ion-item>
-              <ion-label>No of Products</ion-label>
-              <ion-note slot="end">100</ion-note>
-            </ion-item>
-            <ion-item>
-              <ion-label>No of Users</ion-label>
-              <ion-note slot="end">2</ion-note>
-            </ion-item>
-          </ion-list>
-        </ion-card-content> -->
       </ion-card>
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <ion-fab-button href="/shops/new">

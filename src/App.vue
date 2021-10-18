@@ -9,7 +9,7 @@
         <ion-content>
           <ion-list id="inbox-list">
             <ion-list-header>Abdul Rehman</ion-list-header>
-            <ion-note>Home Office</ion-note>
+            <ion-note>{{((selectedShop && user.shops)?(user.shops[selectedShop]):'')}}</ion-note>
 
             <ion-menu-toggle auto-hide="false" v-for="(p, i) in appPages" :key="i">
               <ion-item
@@ -30,12 +30,14 @@
             <ion-select
               placeholder="Select One"
               :value="selectedShop"
-              @ionChange="selectShop($event)"
+              v-model="selectedShop"
+              @ionChange="selectShop($event.target.value)"
             >
               <ion-select-option
                 v-for="(shop, key) in user.shops"
                 :key="key"
                 :value="key"
+                :selected="(key == selectedShop)"
                 >{{ shop }}</ion-select-option
               >
             </ion-select>
@@ -61,6 +63,7 @@ import {
   IonNote,
   IonRouterOutlet,
   IonSplitPane,
+  IonSelect
 } from "@ionic/vue";
 import { defineComponent, reactive, toRefs } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -93,6 +96,7 @@ export default defineComponent({
     IonNote,
     IonRouterOutlet,
     IonSplitPane,
+    IonSelect
   },
   setup() {
     AppPreferences.fetch("selected_shop");
@@ -140,12 +144,12 @@ export default defineComponent({
     ];
     const router = useRouter();
 
-    if (auth.currentUser) {
+    if (auth.currentUser?.uid) {
       db.collection("users")
         .doc(auth.currentUser?.uid)
         .onSnapshot((doc) => {
           state.user = doc.data() || {};
-          if (!doc.data()?.shops) {
+          if (!doc.data()?.shops || !Object.keys(doc.data()?.shops).length) {
             router.push("/shops/new");
           } else {
             if (!localStorage.selectedShop) {
@@ -155,8 +159,9 @@ export default defineComponent({
           }
         });
     }
-    const selectShop = (e: Event & { target: HTMLInputElement }) => {
-      console.log(e.target.value);
+    const selectShop = (e: string) => {
+      state.selectedShop = e
+      localStorage.selectedShop = e
     };
 
     return {

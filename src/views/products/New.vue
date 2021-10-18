@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button defaultHref="/products" />
         </ion-buttons>
         <ion-title>New Shop</ion-title>
       </ion-toolbar>
@@ -102,10 +102,16 @@
                   <ion-col>
                     <ion-item>
                       <ion-label>Measurement Unit</ion-label>
-                      <ion-select v-model="measurementUnit" @change="measurementUnit = $event.target.value" ok-text="Okay" cancel-text="Dismiss">
+                      <ion-select
+                        v-model="measurementUnit"
+                        @change="measurementUnit = $event.target.value"
+                        ok-text="Okay"
+                        cancel-text="Dismiss"
+                      >
                         <ion-select-option value="piece">Piece</ion-select-option>
                         <ion-select-option value="liter">Liter</ion-select-option>
                         <ion-select-option value="ml">Ml</ion-select-option>
+                        <ion-select-option value="mg">Mg</ion-select-option>
                       </ion-select>
                     </ion-item>
                   </ion-col>
@@ -126,7 +132,7 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from "@ionic/vue";
+import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
 import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
 import { auth, db } from "@/main";
 import router from "@/router";
@@ -137,6 +143,7 @@ export default {
   components: {
     IonContent,
     IonPage,
+    IonBackButton
   },
   setup() {
     const state = reactive({
@@ -202,7 +209,7 @@ export default {
             sku: sku,
             stockQuantity: parseInt(stockQuantity),
             weight: null,
-            measurementUnit:measurementUnit
+            measurementUnit: measurementUnit,
           });
         router.push("/products");
       } catch (error) {

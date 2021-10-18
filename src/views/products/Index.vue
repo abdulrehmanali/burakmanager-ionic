@@ -27,9 +27,11 @@
         </ion-item>
       </ion-list>
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button href="/products/new">
-          <ion-icon :icon="add"></ion-icon>
-        </ion-fab-button>
+        <router-link to="/products/new">
+          <ion-fab-button>
+            <ion-icon :icon="add"></ion-icon>
+          </ion-fab-button>
+        </router-link>
       </ion-fab>
     </ion-content>
   </ion-page>
