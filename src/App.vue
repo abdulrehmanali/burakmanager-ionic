@@ -66,7 +66,7 @@ import {
   IonSelect
 } from "@ionic/vue";
 import { defineComponent, reactive, toRefs } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import {
   cardOutline,
   cardSharp,
