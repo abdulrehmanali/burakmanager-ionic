@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import { auth, getCurrentUser } from "./../main";
+import { getCurrentUser } from "./../main";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -38,14 +38,14 @@ const routes: Array<RouteRecordRaw> = [
     meta:{haveSideBar:true,requiresAuth:true}
   },
   {
-    path: '/products/new',
-    component: () => import ('../views/products/New.vue'),
-    meta:{requiresAuth:true}
-  },
-  {
     path: '/products/:sku',
     component: () => import ('../views/products/Edit.vue'),
-    meta:{requiresAuth:true}
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
+    path: '/products/new',
+    component: () => import ('../views/products/New.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
   },
   {
     path: '/production-products',
@@ -61,17 +61,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/customers',
     component: () => import ('../views/customers/Index.vue'),
     meta:{haveSideBar:true,requiresAuth:true}
+  },  
+  {
+    path: '/customers/:id',
+    component: () => import ('../views/customers/Edit.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
   },
   {
     path: '/customers/new',
     component: () => import ('../views/customers/New.vue'),
-    meta:{requiresAuth:true}
+    meta:{haveSideBar:true,equiresAuth:true}
   },
-  {
-    path: '/customers/:id',
-    component: () => import ('../views/customers/Edit.vue'),
-    meta:{requiresAuth:true}
-  },
+
   {
     path: '/ledger',
     component: () => import ('../views/ledger/Index.vue'),
@@ -80,7 +81,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/ledger/new',
     component: () => import ('../views/ledger/New.vue'),
-    meta:{requiresAuth:true}
+    meta:{haveSideBar:true,requiresAuth:true}
   },
 ]
 

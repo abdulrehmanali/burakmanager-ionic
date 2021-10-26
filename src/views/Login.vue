@@ -6,7 +6,6 @@
           <ion-card-header>
             <ion-card-title>Login</ion-card-title>
           </ion-card-header>
-
           <ion-card-content>
             <form @submit.prevent="signInWithEmailAndPassword(email, password)">
               <ion-item>
@@ -66,7 +65,7 @@ export default {
           state.errorMsg = "Email and Password is Required";
           return;
         }
-        const authRes = await auth.signInWithEmailAndPassword(email, password);
+         await auth.signInWithEmailAndPassword(email, password);
         location.href = "/";
       } catch (error) {
         state.errorMsg = error.message;

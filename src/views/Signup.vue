@@ -1,12 +1,5 @@
 <template>
   <ion-page>
-    <ion-header :translucent="true">
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <IonBackButton />
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
     <ion-content :fullscreen="true">
       <div id="container">
         <ion-card>
@@ -36,6 +29,12 @@
                       <ion-input v-model="confirmPassword" type="password" @input="confirmPassword = $event.target.value"></ion-input>
                   </ion-item>
                   <ion-button expand="block" type="submit">Sign Up</ion-button>
+                  <ion-button
+                    color="medium"
+                    expand="block"
+                    @click="() => router.push('/login')"
+                    >Login</ion-button
+                  >
                 </form>
             </ion-card-content>
         </ion-card>
@@ -100,6 +99,7 @@ export default {
     return {
       ...toRefs(state),
       signUpWithEmailAndPassword,
+      router
     };
   },
 }

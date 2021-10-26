@@ -1,17 +1,23 @@
 <template>
   <IonApp>
-    <ion-router-outlet
-      v-if="!$router.meta?.haveSideBar"
-      id="main-content"
-    ></ion-router-outlet>
-    <IonSplitPane v-if="$route.meta.haveSideBar" content-id="main-content">
-      <ion-menu content-id="main-content" type="overlay">
+    <IonSplitPane content-id="main-content">
+      <ion-menu
+        content-id="main-content"
+        type="overlay"
+        v-if="$route.meta.haveSideBar"
+      >
         <ion-content>
           <ion-list id="inbox-list">
-            <ion-list-header>Abdul Rehman</ion-list-header>
-            <ion-note>{{((selectedShop && user.shops)?(user.shops[selectedShop]):'')}}</ion-note>
+            <ion-list-header>{{ user.name }}</ion-list-header>
+            <ion-note>{{
+              selectedShop && user.shops ? user.shops[selectedShop] : ""
+            }}</ion-note>
 
-            <ion-menu-toggle auto-hide="false" v-for="(p, i) in appPages" :key="i">
+            <ion-menu-toggle
+              auto-hide="false"
+              v-for="(p, i) in appPages"
+              :key="i"
+            >
               <ion-item
                 router-direction="root"
                 :router-link="p.url"
@@ -20,7 +26,11 @@
                 class="hydrated"
                 :class="{ selected: p.url === router.fullPath }"
               >
-                <ion-icon slot="start" :ios="p.iosIcon" :md="p.mdIcon"></ion-icon>
+                <ion-icon
+                  slot="start"
+                  :ios="p.iosIcon"
+                  :md="p.mdIcon"
+                ></ion-icon>
                 <ion-label>{{ p.title }}</ion-label>
               </ion-item>
             </ion-menu-toggle>
@@ -37,7 +47,7 @@
                 v-for="(shop, key) in user.shops"
                 :key="key"
                 :value="key"
-                :selected="(key == selectedShop)"
+                :selected="key == selectedShop"
                 >{{ shop }}</ion-select-option
               >
             </ion-select>
@@ -63,7 +73,7 @@ import {
   IonNote,
   IonRouterOutlet,
   IonSplitPane,
-  IonSelect
+  IonSelect,
 } from "@ionic/vue";
 import { defineComponent, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
@@ -78,9 +88,14 @@ import {
   cubeSharp,
   storefrontOutline,
   storefrontSharp,
+  personOutline,
+  personSharp,
+  calculatorOutline,
+  calculatorSharp
 } from "ionicons/icons";
 import { db, auth } from "./main";
-import { AppPreferences } from "@ionic-native/app-preferences";
+import { Storage } from "@ionic/storage";
+
 export default defineComponent({
   name: "App",
   components: {
@@ -96,13 +111,12 @@ export default defineComponent({
     IonNote,
     IonRouterOutlet,
     IonSplitPane,
-    IonSelect
+    IonSelect,
   },
   setup() {
-    AppPreferences.fetch("selected_shop");
     const state = reactive({
       user: {},
-      selectedShop: localStorage.selectedShop,
+      selectedShop: "",
     });
     const appPages = [
       {
@@ -126,14 +140,14 @@ export default defineComponent({
       {
         title: "Production Products",
         url: "/production-products/new",
-        iosIcon: cubeOutline,
-        mdIcon: cubeSharp,
+        iosIcon: calculatorOutline,
+        mdIcon: calculatorSharp,
       },
       {
         title: "Customers",
         url: "/customers",
-        iosIcon: readerOutline,
-        mdIcon: readerSharp,
+        iosIcon: personOutline,
+        mdIcon: personSharp,
       },
       {
         title: "Ledger",
@@ -143,25 +157,37 @@ export default defineComponent({
       },
     ];
     const router = useRouter();
-
-    if (auth.currentUser?.uid) {
+    const store = new Storage();
+    const setupApp = async () => {
+      await store.create();
+      if (!auth.currentUser?.uid) {
+        return;
+      }
       db.collection("users")
         .doc(auth.currentUser?.uid)
-        .onSnapshot((doc) => {
+        .onSnapshot(async (doc) => {
           state.user = doc.data() || {};
+          await store.set("currentUser", JSON.stringify(state.user));
           if (!doc.data()?.shops || !Object.keys(doc.data()?.shops).length) {
             router.push("/shops/new");
           } else {
-            if (!localStorage.selectedShop) {
+            const selectedShop = await store.get("selectedShop");
+            if (!selectedShop) {
               state.selectedShop = Object.keys(doc.data()?.shops)[0];
-              localStorage.selectedShop = Object.keys(doc.data()?.shops)[0];
+              await store.set(
+                "selectedShop",
+                Object.keys(doc.data()?.shops)[0]
+              );
+            } else {
+              state.selectedShop = selectedShop;
             }
           }
         });
-    }
-    const selectShop = (e: string) => {
-      state.selectedShop = e
-      localStorage.selectedShop = e
+    };
+    setupApp();
+    const selectShop = async (e: string) => {
+      state.selectedShop = e;
+      await store.set("selectedShop", e);
     };
 
     return {
@@ -178,6 +204,10 @@ export default defineComponent({
       cubeSharp,
       storefrontOutline,
       storefrontSharp,
+      personOutline,
+      personSharp,
+      calculatorOutline,
+      calculatorSharp,
       router,
     };
   },
@@ -222,11 +252,8 @@ ion-menu.md ion-list#inbox-list ion-list-header {
 
 ion-menu.md ion-list#labels-list ion-list-header {
   font-size: 16px;
-
   margin-bottom: 18px;
-
   color: #757575;
-
   min-height: 26px;
 }
 

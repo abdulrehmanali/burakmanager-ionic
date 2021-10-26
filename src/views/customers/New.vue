@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button default-href="/customers"></ion-back-button>
         </ion-buttons>
         <ion-title>New Customer</ion-title>
       </ion-toolbar>
@@ -63,18 +63,21 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from "@ionic/vue";
-import { auth, db } from "@/main";
+import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
+import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "NewProduct",
   components: {
     IonContent,
     IonPage,
+    IonBackButton
   },
   setup() {
+    const store = new Storage();
     const state = reactive({
       name: "",
       contactNumber: "",
@@ -87,9 +90,11 @@ export default {
       email: string
     ) => {
       try {
+        await store.create();
+        const selectedShop = await store.get('selectedShop');
         await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("customers")
           .add({
             createdAt: new Date().getTime(),
@@ -108,13 +113,4 @@ export default {
 };
 </script>
 
-<style scoped>
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-</style>
+<style scoped></style>

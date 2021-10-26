@@ -10,7 +10,7 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-searchbar></ion-searchbar>
-
+      <ion-spinner v-if="loading" class="loader" />
       <ion-card v-for="(name, id) in shops" v-bind:key="id">
         <ion-card-header>
           <ion-card-title>{{ name }}</ion-card-title>
@@ -30,6 +30,7 @@ import { IonContent, IonPage } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { reactive, toRefs } from "@vue/reactivity";
 import { auth, db } from "@/main";
+import { add } from "ionicons/icons";
 
 export default {
   name: "Shops",
@@ -37,13 +38,15 @@ export default {
     const router = useRouter();
     const state = reactive({
       shops: [],
+      loading: true
     });
     db.collection("users")
       .doc(auth.currentUser?.uid)
       .onSnapshot((doc) => {
         state.shops = doc.data()?.shops;
+        state.loading = false
       });
-    return { router, ...toRefs(state) };
+    return { router,add, ...toRefs(state) };
   },
   components: {
     IonContent,

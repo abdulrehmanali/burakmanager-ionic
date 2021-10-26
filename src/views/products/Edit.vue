@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button />
         </ion-buttons>
-        <ion-title>Edit Shop</ion-title>
+        <ion-title>Edit Product</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -107,10 +107,8 @@
                   <ion-col>
                     <ion-item>
                       <ion-label>Measurement Unit</ion-label>
-                      <ion-select v-model="product.measurementUnit" @change="product.measurementUnit = $event.target.value" ok-text="Okay" cancel-text="Dismiss">
-                        <ion-select-option value="piece">Piece</ion-select-option>
-                        <ion-select-option value="liter">Liter</ion-select-option>
-                        <ion-select-option value="ml">Ml</ion-select-option>
+                      <ion-select v-model="product.measurementUnit" @change="product.measurementUnit = $event.target.value" :value="product.measurementUnit" ok-text="Okay" cancel-text="Dismiss">
+                        <ion-select-option :value="am.key" v-for="am in availableMeasurementUnits" :key="am.key">{{am.name}}</ion-select-option>
                       </ion-select>
                     </ion-item>
                   </ion-col>
@@ -131,28 +129,51 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
+import { IonContent, IonPage, IonBackButton, IonSelect } from "@ionic/vue";
 import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
-import { auth, db } from "@/main";
+import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "EditProduct",
   components: {
     IonContent,
     IonPage,
-    IonBackButton
+    IonBackButton,
+    IonSelect
   },
   setup() {
+    const store = new Storage();
     const route = useRoute();
     const { sku } = route.params;
+    
     const state = reactive({
       product: {
         sku: "",
       },
       errorMsg: "",
+      availableMeasurementUnits:[
+        {'key':'centigram','name':"Centigram (cg)"},
+        {'key':'centilitre','name':"Centilitre (cL)"},
+        {'key':'decagram','name':"Decagram (dag)"},
+        {'key':'decalitre','name':"Decalitre (daL)"},
+        {'key':'decigram','name':"Decigram (dg)"},
+        {'key':'decilitre','name':"Decilitre (dL)"},
+        {'key':'gram','name':"Gram (g)"},
+        {'key':'hectogram','name':"Hectogram (hg)"},
+        {'key':'hectolitre','name':"Hectolitre (hL)"},
+        {'key':'kilo','name':"Kilo (k)"},
+        {'key':'kilogram','name':"Kilogram (kg)"},
+        {'key':'kilolitre','name':"Kilolitre (kL)"},
+        {'key':'litre','name':"Litre (L)"},
+        {'key':'milligram','name':"Milligram (mg)"},
+        {'key':'millilitre','name':"Millilitre (mL)"},
+        {'key':'piece','name':"Piece(s)"},
+        {'key':'tonne','name':"Tonne (t)"}
+      ]
     });
     const openScanner = async () => {
       QRScanner.prepare()
@@ -180,9 +201,11 @@ export default {
 
     const getProduct = async (sku: any) => {
       try {
+        await store.create();
+        const selectedShop = await store.get('selectedShop');
         const product = await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("products")
           .doc(sku)
           .get();
@@ -203,9 +226,10 @@ export default {
       measurementUnit: string
     ) => {
       try {
+        const selectedShop = await store.get('selectedShop');
         await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("products")
           .doc(sku)
           .update({
@@ -229,14 +253,4 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-</style>
+<style scoped></style>

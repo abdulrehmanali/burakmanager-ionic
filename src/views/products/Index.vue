@@ -10,6 +10,7 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-searchbar></ion-searchbar>
+      <ion-spinner v-if="loading" class="loader" />
       <ion-list>
         <ion-item
           v-for="(product, key) in products"
@@ -26,6 +27,17 @@
           </ion-note>
         </ion-item>
       </ion-list>
+      <ion-infinite-scroll
+        @ionInfinite="loadMore($event)" 
+        threshold="100px" 
+        id="infinite-scroll"
+        :disabled="loadMoreDisabled"
+      >
+        <ion-infinite-scroll-content
+          loading-spinner="bubbles"
+          loading-text="Loading more data...">
+        </ion-infinite-scroll-content>
+      </ion-infinite-scroll>
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <router-link to="/products/new">
           <ion-fab-button>
@@ -38,37 +50,54 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonFab, IonFabButton } from "@ionic/vue";
+import { IonContent, IonPage, IonFab, IonFabButton, IonInfiniteScroll, IonInfiniteScrollContent } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
 import { db } from "@/main";
 import { reactive, toRefs } from "@vue/reactivity";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "Products",
   setup() {
+    const store = new Storage();
     const router = useRouter();
     const state = reactive({
-      products: [],
+      products: [] as any,
+      loadMoreDisabled: true,
+      loading: true
     });
-    db.collection("shops")
-      .doc(localStorage.selectedShop)
-      .collection("products")
-      .onSnapshot((doc) => {
-        const result = [] as any;
-        doc.docs.map((e) => {
-          result.push(e.data());
+    const getProducts = async()=>{
+      await store.create();
+      const selectedShop = await store.get('selectedShop');
+      const query = db.collection("shops")
+        .doc(selectedShop)
+        .collection("products").limit(10);
+        query.onSnapshot((doc) => {
+          doc.docs.map((e) => {
+            state.products.push(e.data());
+          });
+          state.loading = false
         });
-        console.log(result);
-        state.products = result;
-      });
-    return { ...toRefs(state), router, add };
+    }
+    getProducts();
+    const loadMore = (ev: CustomEvent)=>{
+      // query.onSnapshot((doc) => {
+      // doc.docs.map((e) => {
+      //   state.products.push(e.data());
+      // });
+      //});
+      //ev.target.complete();
+    }
+    return { ...toRefs(state), router, add, loadMore};
   },
   components: {
     IonContent,
     IonPage,
     IonFab,
     IonFabButton,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent
   },
 };
 </script>

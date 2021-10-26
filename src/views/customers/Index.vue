@@ -10,6 +10,7 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-searchbar></ion-searchbar>
+      <ion-spinner v-if="loading" class="loader" />
       <ion-list>
         <ion-item
           v-for="(customer, key) in customers"
@@ -24,9 +25,11 @@
         </ion-item>
       </ion-list>
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button href="/customers/new">
-          <ion-icon :icon="add"></ion-icon>
-        </ion-fab-button>
+        <router-link to="/customers/new">
+          <ion-fab-button>
+            <ion-icon :icon="add"></ion-icon>
+          </ion-fab-button>
+        </router-link>
       </ion-fab>
     </ion-content>
   </ion-page>
@@ -38,27 +41,33 @@ import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
 import { db } from "@/main";
 import { reactive, toRefs } from "@vue/reactivity";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "Customers",
   setup() {
+    const store = new Storage();
     const router = useRouter();
     const state = reactive({
-      customers: [],
+      customers: [] as any,
+      loading:true
     });
-    db.collection("shops")
-      .doc(localStorage.selectedShop)
+    const getCustomers = async ()=>{
+      await store.create();
+      const selectedShop = await store.get('selectedShop');
+      db.collection("shops")
+      .doc(selectedShop)
       .collection("customers")
       .onSnapshot((doc) => {
-        const result = [] as any;
         doc.docs.map((e) => {
           const c = e.data();
           c.id = e.id;
-          result.push(c);
+          state.customers.push(c);
         });
-        console.log(result);
-        state.customers = result;
+        state.loading = false
       });
+    }
+    getCustomers();
     return { ...toRefs(state), router, add };
   },
   components: {

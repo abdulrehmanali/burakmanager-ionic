@@ -1,7 +1,7 @@
 <template>
   <ion-header>
     <ion-toolbar>
-      <ion-title>Select Product</ion-title>
+      <ion-title>Select Customer</ion-title>
       <ion-icon slot="end" :icon="closeOutline" class="close-model" v-on:click="closeModel()"></ion-icon>
     </ion-toolbar>
   </ion-header>
@@ -13,17 +13,14 @@
   </ion-item>
   <ion-list>
     <ion-item
-      v-for="product in products"
-      :key="product.sku"
-      v-on:click="()=>{onProductClick(product)}"
+      v-for="customer in customers"
+      :key="customer.email"
+      v-on:click="()=>{onCustomerClick(customer)}"
     >
-      <ion-label>
-        <h2>{{ product.name }}</h2>
-        <p>{{ product.stockQuantity }} items remaining</p>
-      </ion-label>
-      <ion-note slot="end">
-        <h4>{{ product.price }} Rs</h4>
-      </ion-note>
+    <ion-label>
+      <h2>{{ customer.name }}</h2>
+      <h4>{{ customer.contactNumber }}</h4>
+    </ion-label>
     </ion-item>
   </ion-list>
   </ion-content>
@@ -38,39 +35,34 @@ import { Storage } from '@ionic/storage';
 import { closeOutline } from "ionicons/icons";
 
 export default defineComponent({
-  name: 'SelectProductModel',
-  props: {
-  },
+  name: 'SelectCustomerMode',
   setup() {
     const store = new Storage();
     const state = reactive({
-      products: [],
-      loading: true
+      loading: true,
+      customers: [],
     });
-    const getProducts = async ()=>{
+    const getShops = async () =>{
       await store.create();
       const selectedShop = await store.get('selectedShop');
       db.collection("shops")
         .doc(selectedShop)
-        .collection("products")
+        .collection("customers")
         .onSnapshot((doc) => {
-          const result = [];
           doc.docs.map((e) => {
-            result.push(e.data());
+            state.customers.push(e.data());
           });
-          state.products = result;
-          state.loading = false;
+          state.loading = false
         });
     }
-    getProducts();
-
-    const onProductClick = (product) => {
-      emitter.emit('select_product_event',JSON.parse(JSON.stringify(product)))
+    getShops();
+    const onCustomerClick = (customer) => {
+      emitter.emit('select_customer_event',JSON.parse(JSON.stringify(customer)))
     }
     const closeModel = () =>{
-      emitter.emit('close_product_model','');
+      emitter.emit('close_customer_model','');
     }
-    return { ...toRefs(state), onProductClick, closeOutline, closeModel};
+    return { ...toRefs(state), onCustomerClick, closeModel, closeOutline};
   },
   components: { IonContent, IonHeader, IonTitle, IonToolbar }
 });

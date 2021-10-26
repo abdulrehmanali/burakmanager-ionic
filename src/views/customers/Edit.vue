@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button default-href="/customers"></ion-back-button>
         </ion-buttons>
         <ion-title>Edit Customer</ion-title>
       </ion-toolbar>
@@ -56,6 +56,18 @@
           </ion-card-content>
         </ion-card>
         <ion-card>
+          <ion-card-header>
+            <ion-card-title>User Orders</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <ion-label>Awesome Label</ion-label>
+            </ion-item>
+          </ion-list>
+          </ion-card-content>
+        </ion-card>
+        <ion-card>
           <ion-card-content v-if="errorMsg" class="error-message">
             {{ errorMsg }}
           </ion-card-content>
@@ -66,20 +78,22 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from "@ionic/vue";
-import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
-import { auth, db } from "@/main";
+import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
+import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "EditCustomer",
   components: {
     IonContent,
     IonPage,
+    IonBackButton
   },
   setup() {
+    const store = new Storage();
     const route = useRoute();
     const { id } = route.params;
     const state = reactive({
@@ -87,16 +101,19 @@ export default {
       id: "",
       errorMsg: "",
     });
+    
     state.id = id as any;
     const getCustomer = async (id: string) => {
       try {
-        const product = await db
+        await store.create();
+        const selectedShop = await store.get('selectedShop');
+        const customer = await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("customers")
           .doc(id)
           .get();
-        state.customer = product.data() as any;
+        state.customer = customer.data() as any;
       } catch (error) {
         state.errorMsg = error.message;
       }
@@ -109,9 +126,10 @@ export default {
       email: string
     ) => {
       try {
+        const selectedShop = await store.get('selectedShop');
         await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("customers")
           .doc(id)
           .set({
@@ -131,13 +149,4 @@ export default {
 };
 </script>
 
-<style scoped>
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-</style>
+<style scoped></style>

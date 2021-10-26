@@ -41,16 +41,20 @@ import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
 import { db } from "@/main";
 import { reactive, toRefs } from "@vue/reactivity";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "Products",
-  setup() {
+  async setup() {
+const store = new Storage();
+await store.create();
+const selectedShop = await store.get('selectedShop');
     const router = useRouter();
     const state = reactive({
       products: [],
     });
     db.collection("shops")
-      .doc(localStorage.selectedShop)
+      .doc(selectedShop)
       .collection("products")
       .onSnapshot((doc) => {
         const result = [] as any;

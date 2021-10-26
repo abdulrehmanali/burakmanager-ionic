@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button default-href="/ledger"></ion-back-button>
         </ion-buttons>
         <ion-title>Edit Entry</ion-title>
       </ion-toolbar>
@@ -66,20 +66,22 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from "@ionic/vue";
-import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
-import { auth, db } from "@/main";
+import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
+import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "EditCustomer",
   components: {
     IonContent,
     IonPage,
+    IonBackButton
   },
   setup() {
+    const store = new Storage();
     const route = useRoute();
     const { id } = route.params;
     const state = reactive({
@@ -90,9 +92,11 @@ export default {
     state.id = id as any;
     const getCustomer = async (id) => {
       try {
+        await store.create();
+        const selectedShop = await store.get('selectedShop');
         const product = await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("customers")
           .doc(id)
           .get();
@@ -109,9 +113,10 @@ export default {
       email: string
     ) => {
       try {
+        const selectedShop = await store.get('selectedShop');
         await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("customers")
           .doc(id)
           .set({

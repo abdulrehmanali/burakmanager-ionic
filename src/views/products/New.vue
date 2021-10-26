@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/products" />
         </ion-buttons>
-        <ion-title>New Shop</ion-title>
+        <ion-title>New Product</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
@@ -108,10 +108,7 @@
                         ok-text="Okay"
                         cancel-text="Dismiss"
                       >
-                        <ion-select-option value="piece">Piece</ion-select-option>
-                        <ion-select-option value="liter">Liter</ion-select-option>
-                        <ion-select-option value="ml">Ml</ion-select-option>
-                        <ion-select-option value="mg">Mg</ion-select-option>
+                        <ion-select-option :value="am.key" v-for="am in availableMeasurementUnits" :key="am.key">{{am.name}}</ion-select-option>
                       </ion-select>
                     </ion-item>
                   </ion-col>
@@ -132,20 +129,23 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
+import { IonContent, IonPage, IonBackButton, IonSelect } from "@ionic/vue";
 import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
-import { auth, db } from "@/main";
+import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "NewProduct",
   components: {
     IonContent,
     IonPage,
-    IonBackButton
+    IonBackButton,
+    IonSelect
   },
   setup() {
+    const store = new Storage();
     const state = reactive({
       name: "",
       price: "",
@@ -155,7 +155,26 @@ export default {
       onSale: "",
       inventoryEnabled: "",
       errorMsg: "",
-      measurementUnit: "",
+      measurementUnit: "piece",
+      availableMeasurementUnits:[
+        {'key':'centigram','name':"Centigram (cg)"},
+        {'key':'centilitre','name':"Centilitre (cL)"},
+        {'key':'decagram','name':"Decagram (dag)"},
+        {'key':'decalitre','name':"Decalitre (daL)"},
+        {'key':'decigram','name':"Decigram (dg)"},
+        {'key':'decilitre','name':"Decilitre (dL)"},
+        {'key':'gram','name':"Gram (g)"},
+        {'key':'hectogram','name':"Hectogram (hg)"},
+        {'key':'hectolitre','name':"Hectolitre (hL)"},
+        {'key':'kilo','name':"Kilo (k)"},
+        {'key':'kilogram','name':"Kilogram (kg)"},
+        {'key':'kilolitre','name':"Kilolitre (kL)"},
+        {'key':'litre','name':"Litre (L)"},
+        {'key':'milligram','name':"Milligram (mg)"},
+        {'key':'millilitre','name':"Millilitre (mL)"},
+        {'key':'piece','name':"Piece(s)"},
+        {'key':'tonne','name':"Tonne (t)"}
+      ]
     });
     const openScanner = async () => {
       QRScanner.prepare()
@@ -190,10 +209,12 @@ export default {
       inventoryEnabled: boolean,
       measurementUnit: string
     ) => {
+      await store.create();
+      const selectedShop = await store.get('selectedShop');
       try {
         await db
           .collection("shops")
-          .doc(localStorage.selectedShop)
+          .doc(selectedShop)
           .collection("products")
           .doc(sku)
           .set({
@@ -221,13 +242,4 @@ export default {
 };
 </script>
 
-<style scoped>
-#container {
-  text-align: center;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-</style>
+<style scoped></style>

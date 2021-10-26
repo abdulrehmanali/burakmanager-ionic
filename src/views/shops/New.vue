@@ -14,9 +14,7 @@
           <ion-card-header>
             <ion-card-title>New Shop</ion-card-title>
           </ion-card-header>
-
           <ion-card-content>
-            <form @submit.prevent="createNewShop(name, address)">
               <ion-item>
                 <ion-label position="floating">Name</ion-label>
                 <ion-input v-model="name" @input="name = $event.target.value"></ion-input>
@@ -29,8 +27,18 @@
                   @input="address = $event.target.value"
                 ></ion-textarea>
               </ion-item>
-              <ion-button expand="block" type="submit">Create</ion-button>
-            </form>
+          </ion-card-content>
+        </ion-card>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Users</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <ion-label>Awesome Label</ion-label>
+            </ion-item>
+          </ion-list>
           </ion-card-content>
         </ion-card>
         <ion-card>
@@ -64,11 +72,16 @@ export default {
       if(!currentUserId){
         state.errorMsg = "Unexpected Error!!. Please Try to logout and login again";
       }
+      if(!name || !address){
+        state.errorMsg = "Please make sure you enter name and address";
+      }
       users[currentUserId] = {
-        canAccessStats: true,
-        canCheckout: true,
+        canCreateEntriesInLedger: true,
+        canEditEntriesInLedger: true,
         canCreateNewProducts: true,
         canEditProducts: true,
+        canCreateNewCustomers: true,
+        canEditCustomers: true,
         createdAt: new Date().getTime(),
         lastUpdatedAt: new Date().getTime(),
       };
@@ -88,7 +101,7 @@ export default {
         await db.collection("users").doc(currentUserId).update({
           shops,
         });
-        location.href = "/";
+        router.push("/");
       } catch (el) {
         state.errorMsg = el.message;
       }
