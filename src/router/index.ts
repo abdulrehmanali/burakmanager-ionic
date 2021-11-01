@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import { getCurrentUser } from "./../main";
+import { Storage } from '@ionic/storage';
+const store = new Storage();
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -90,8 +91,9 @@ const router = createRouter({
   routes
 })
 router.beforeEach(async (to,from,next)=>{
-  const user = await getCurrentUser;
-  if(to.meta.requiresAuth && !user){
+  await store.create()
+  const token = await store.get('token');
+  if(to.meta.requiresAuth && !token){
     router.push("/login");
   }
   next();

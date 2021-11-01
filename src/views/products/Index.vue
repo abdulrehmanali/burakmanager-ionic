@@ -9,7 +9,7 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <ion-searchbar></ion-searchbar>
+      <ion-searchbar @input="onSearch($event.target.value)" show-cancel-button="focus" animated v-on:ionCancel="onSearch('')"/>
       <ion-spinner v-if="loading" class="loader" />
       <ion-list>
         <ion-item
@@ -20,10 +20,11 @@
         >
           <ion-label>
             <h2>{{ product.name }}</h2>
-            <p>{{ product.stockQuantity }} items remaining</p>
+            <p>{{ (product.batches?product.batches.length:0) }} Batches</p>
           </ion-label>
           <ion-note slot="end">
-            <h4>{{ product.price }} Rs</h4>
+            <h4>{{product.sku}}</h4>
+            <!-- <h4>{{ product.batches?(product.batches.map(e=>{return e.purchasePrice;}).reduce((total, num)=>{return total + Math.round(num)})):"" }}</h4> -->
           </ion-note>
         </ion-item>
       </ion-list>
@@ -60,36 +61,61 @@ import { Storage } from '@ionic/storage';
 export default {
   name: "Products",
   setup() {
+    let query: any;
     const store = new Storage();
     const router = useRouter();
     const state = reactive({
       products: [] as any,
-      loadMoreDisabled: true,
-      loading: true
+      search:"",
+      loadMoreDisabled: false,
+      loading: true,
+      lastDocument:{}
     });
     const getProducts = async()=>{
+      state.products = [];
       await store.create();
       const selectedShop = await store.get('selectedShop');
-      const query = db.collection("shops")
-        .doc(selectedShop)
-        .collection("products").limit(10);
-        query.onSnapshot((doc) => {
-          doc.docs.map((e) => {
+      query = db.collection("shops").doc(selectedShop)
+        .collection("products");
+        if(state.search){
+          query = query.orderBy('name','asc').where('name','>=',state.search);
+        }else{
+          query = query.orderBy('createdAt','desc')
+        }
+        query = query.limit(10)
+        query.onSnapshot((doc: any) => {
+          doc.docs.map((e: any) => {
             state.products.push(e.data());
           });
+          if(doc.docs && doc.docs.length){
+            state.lastDocument = doc.docs[doc.docs.length-1]
+          }
           state.loading = false
         });
     }
     getProducts();
-    const loadMore = (ev: CustomEvent)=>{
-      // query.onSnapshot((doc) => {
-      // doc.docs.map((e) => {
-      //   state.products.push(e.data());
-      // });
-      //});
-      //ev.target.complete();
+    const loadMore = (ev: any)=>{
+      query.startAfter(state.lastDocument).onSnapshot((doc: any) => {
+        doc.docs.map((e: any) => {
+          state.products.push(e.data());
+          state.lastDocument = e.data();
+        });
+        if(doc.docs && doc.docs.length){
+          state.lastDocument = doc.docs[doc.docs.length-1]
+        }
+        if(doc.docs.length < 10){
+          state.loadMoreDisabled = true
+        }
+        ev.target?.complete()
+      });
     }
-    return { ...toRefs(state), router, add, loadMore};
+    const onSearch = (toSearch: string)=>{
+      state.search = toSearch;
+      setTimeout( function() {
+        getProducts(); 
+      }, 600);
+    }
+    return { ...toRefs(state), router, add, loadMore, onSearch};
   },
   components: {
     IonContent,

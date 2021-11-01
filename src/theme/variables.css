@@ -241,6 +241,10 @@ http://ionicframework.com/docs/theming/ */
   text-align: center;
 }
 
+.error-text {
+  color: #842029;
+}
+
 .loader {
   margin: 10px auto;
   display: block;

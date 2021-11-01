@@ -51,7 +51,7 @@
                   </ion-col>
                 </ion-row>
               </ion-grid>
-              <ion-button expand="block" type="submit">Save</ion-button>
+              <ion-button expand="block" type="submit" :disabled="disableSave">Save</ion-button>
             </form>
           </ion-card-content>
         </ion-card>
@@ -100,11 +100,13 @@ export default {
       customer: {},
       id: "",
       errorMsg: "",
+      disableSave:false
     });
     
     state.id = id as any;
     const getCustomer = async (id: string) => {
       try {
+        state.disableSave = true;
         await store.create();
         const selectedShop = await store.get('selectedShop');
         const customer = await db
@@ -114,8 +116,10 @@ export default {
           .doc(id)
           .get();
         state.customer = customer.data() as any;
+        state.disableSave = false;
       } catch (error) {
         state.errorMsg = error.message;
+        state.disableSave = false;
       }
     };
 
@@ -126,6 +130,7 @@ export default {
       email: string
     ) => {
       try {
+        state.disableSave = true;
         const selectedShop = await store.get('selectedShop');
         await db
           .collection("shops")
@@ -139,8 +144,10 @@ export default {
             email: email,
           });
         router.back();
+        state.disableSave = false;
       } catch (error) {
         state.errorMsg = error.message;
+        state.disableSave = false;
       }
     };
     getCustomer(id.toString());

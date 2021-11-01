@@ -11,24 +11,7 @@
     <ion-content :fullscreen="true">
       <div id="container">
         <ion-card>
-          <ion-card-header>
-            <ion-card-title></ion-card-title>
-          </ion-card-header>
           <ion-card-content>
-            <form
-              @submit.prevent="
-                createNewProduct(
-                  name,
-                  price,
-                  sku,
-                  salePrice,
-                  stockQuantity,
-                  onSale,
-                  inventoryEnabled,
-                  measurementUnit
-                )
-              "
-            >
               <ion-grid>
                 <ion-row>
                   <ion-col>
@@ -44,80 +27,97 @@
                 <ion-row>
                   <ion-col>
                     <ion-item>
-                      <ion-label position="floating">Price*</ion-label>
-                      <ion-input
-                        v-model="price"
-                        @input="price = $event.target.value"
-                      ></ion-input>
-                    </ion-item>
-                  </ion-col>
-                </ion-row>
-                <ion-row>
-                  <ion-col>
-                    <ion-item>
                       <ion-label position="floating">SKU*</ion-label>
                       <ion-input
-                        v-model="sku"
-                        @input="sku = $event.target.value"
+                        @input='onSkuInput($event.target.value)'
+                        :value='sku'
                       ></ion-input>
                     </ion-item>
                   </ion-col>
                   <ion-col>
-                    <ion-button color="primary" v-on:click="openScanner()"
+                    <ion-button color="primary" v-on:click="openScanner()" class="ion-float-end"
                       >Scan</ion-button
                     >
                   </ion-col>
                 </ion-row>
-                <ion-row>
-                  <ion-col>
-                    <ion-item>
-                      <ion-label position="floating">Sale Price*</ion-label>
-                      <ion-input
-                        v-model="salePrice"
-                        @input="salePrice = $event.target.value"
-                      ></ion-input>
-                    </ion-item>
-                  </ion-col>
-                  <ion-col>
-                    <ion-item>
-                      <ion-label>On Sale</ion-label>
-                      <ion-toggle
-                        value="true"
-                        v-model="onSale"
-                        @input="onSale = $event.target.value"
-                      />
-                    </ion-item>
-                  </ion-col>
-                </ion-row>
-                <ion-row>
-                  <ion-col>
-                    <ion-item>
-                      <ion-label position="floating">Quantity</ion-label>
-                      <ion-input
-                        v-model="stockQuantity"
-                        @input="stockQuantity = $event.target.value"
-                      ></ion-input>
-                    </ion-item>
-                  </ion-col>
-                  <ion-col>
-                    <ion-item>
-                      <ion-label>Measurement Unit</ion-label>
-                      <ion-select
-                        v-model="measurementUnit"
-                        @change="measurementUnit = $event.target.value"
-                        ok-text="Okay"
-                        cancel-text="Dismiss"
-                      >
-                        <ion-select-option :value="am.key" v-for="am in availableMeasurementUnits" :key="am.key">{{am.name}}</ion-select-option>
-                      </ion-select>
-                    </ion-item>
-                  </ion-col>
-                </ion-row>
               </ion-grid>
-              <ion-button expand="block" type="submit">Create</ion-button>
-            </form>
           </ion-card-content>
         </ion-card>
+        <ion-card>
+          <ion-card-header>
+            <ion-row class="ion-align-items-start">
+              <ion-col>
+                <ion-card-title style="margin: 10px 0px"
+                  >Batches</ion-card-title
+                >
+              </ion-col>
+              <ion-col>
+                <ion-button @click="addBatch" class="ion-float-end"
+                  >Add New</ion-button
+                >
+              </ion-col>
+            </ion-row>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-row v-for="(batch, id) in batches" :key="id">
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="stacked">Purchase Date*</ion-label>
+                  <ion-input
+                    v-model="batch.purchaseDate"
+                    type="date"
+                    @input="batch.purchaseDate = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="floating">Purchase Price*</ion-label>
+                  <ion-input
+                    v-model="batch.purchasePrice"
+                    type="number"
+                    @input="batch.purchasePrice = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="floating">Quantity*</ion-label>
+                  <ion-input
+                    v-model="batch.stockQuantity"
+                    @input="batch.stockQuantity = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="stacked">Measurement Unit*</ion-label>
+                  <ion-select
+                    v-model="measurementUnit"
+                    @change="batch.measurementUnit = $event.target.value"
+                    ok-text="Okay"
+                    cancel-text="Dismiss"
+                  >
+                    <ion-select-option :value="am.key" v-for="am in availableMeasurementUnits" :key="am.key">{{am.name}}</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="floating">Selling Price*</ion-label>
+                  <ion-input
+                    v-model="batch.sellingPrice"
+                    @input="batch.sellingPrice = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-button @click="deleteBatch(id)" class="ion-float-end">Delete</ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
+        <ion-button expand="block" type="submit" @click="createNewProduct()" :disabled="disableCreateButton">Create</ion-button>
         <ion-card>
           <ion-card-content v-if="errorMsg" class="error-message">
             {{ errorMsg }}
@@ -156,6 +156,8 @@ export default {
       inventoryEnabled: "",
       errorMsg: "",
       measurementUnit: "piece",
+      batches:[] as any,
+      disableCreateButton:false,
       availableMeasurementUnits:[
         {'key':'centigram','name':"Centigram (cg)"},
         {'key':'centilitre','name':"Centilitre (cL)"},
@@ -173,7 +175,8 @@ export default {
         {'key':'milligram','name':"Milligram (mg)"},
         {'key':'millilitre','name':"Millilitre (mL)"},
         {'key':'piece','name':"Piece(s)"},
-        {'key':'tonne','name':"Tonne (t)"}
+        {'key':'tonne','name':"Tonne (t)"},
+        {'key':'packet','name':"Packet"}
       ]
     });
     const openScanner = async () => {
@@ -199,45 +202,95 @@ export default {
         })
         .catch((e: any) => alert(e));
     };
-    const createNewProduct = async (
-      name: string,
-      price: string,
-      sku: string,
-      salePrice: string,
-      stockQuantity: string,
-      onSale: boolean,
-      inventoryEnabled: boolean,
-      measurementUnit: string
-    ) => {
+    const createNewProduct = async () => {
+      state.errorMsg = "";
+      state.disableCreateButton = true;
+      state.sku = state.sku.replaceAll(/^\s+|\s+$/g,'').replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+      if(!state.name){
+        state.errorMsg = "Name is required";
+        state.disableCreateButton = false;
+        return;
+      }
+      if(!state.sku){
+        state.errorMsg = "SKU is required";
+        state.disableCreateButton = false;
+        return;
+      }
+      if(!state.batches.length){
+        state.errorMsg = "Atleast one batch is required";
+        state.disableCreateButton = false;
+        return;
+      }
+      let haveNullBatch = false;
+      state.batches.forEach((element: any,k: any) => {
+        const isEmpty = Object.values(element).every(x => x == null || x == '');
+        if(isEmpty){
+          state.errorMsg = "Please make sure all values filled in Batch #"+k;
+          haveNullBatch = true;
+          state.disableCreateButton = false;
+          return;
+        }
+      });
+      if(haveNullBatch){
+        return;
+      }
       await store.create();
       const selectedShop = await store.get('selectedShop');
+      if(!selectedShop){
+        state.errorMsg = "Shop is not selected";
+        state.disableCreateButton = false;
+        return;
+      }
       try {
+        const productExist = await db
+          .collection("shops")
+          .doc(selectedShop)
+          .collection("products")
+          .doc(state.sku).get()
+        if(productExist.exists || productExist.data() != null){
+          state.errorMsg = "Product with this SKU already exists";
+          state.disableCreateButton = false;
+          return;
+        }
         await db
           .collection("shops")
           .doc(selectedShop)
           .collection("products")
-          .doc(sku)
+          .doc(state.sku)
           .set({
             createdAt: new Date().getTime(),
             lastUpdatedAt: new Date().getTime(),
-            expiryAt: null,
-            formatedExpiry: null,
-            inventoryEnable: inventoryEnabled,
-            name: name,
-            onSale: onSale,
-            price: parseInt(price),
-            salePrice: parseInt(salePrice),
-            sku: sku,
-            stockQuantity: parseInt(stockQuantity),
-            weight: null,
-            measurementUnit: measurementUnit,
+            name: state.name,
+            sku: state.sku,
+            batches:state.batches
           });
         router.push("/products");
       } catch (error) {
         state.errorMsg = error.message;
+        state.disableCreateButton = false;
       }
     };
-    return { ...toRefs(state), openScanner, createNewProduct };
+    const onSkuInput = (sku: any)=>{
+      state.sku = sku.replaceAll(/^\s+|\s+$/g,'').replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    }
+    const addBatch = ()=>{
+      state.batches.push({
+        purchaseDate:"",
+        purchasePrice: 0,
+        stockQuantity: 0,
+        measurementUnit:"piece",
+        sellingPrice:0
+      });
+    }
+    const deleteBatch = (id: any)=>{
+      if(confirm("Are you sure?")){
+        const batches = state.batches
+        batches.splice(id, 1)
+        state.batches = batches
+        console.log(state.batches)
+      }
+    }
+    return { ...toRefs(state), openScanner, onSkuInput, addBatch, deleteBatch, createNewProduct };
   },
 };
 </script>

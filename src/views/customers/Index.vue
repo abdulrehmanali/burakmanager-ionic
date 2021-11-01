@@ -54,6 +54,7 @@ export default {
     });
     const getCustomers = async ()=>{
       await store.create();
+      state.customers = [];
       const selectedShop = await store.get('selectedShop');
       db.collection("shops")
       .doc(selectedShop)

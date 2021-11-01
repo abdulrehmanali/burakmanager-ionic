@@ -118,6 +118,80 @@
             </form>
           </ion-card-content>
         </ion-card>
+                <ion-card>
+          <ion-card-header>
+            <ion-row class="ion-align-items-start">
+              <ion-col>
+                <ion-card-title style="margin: 10px 0px"
+                  >Batches</ion-card-title
+                >
+              </ion-col>
+              <ion-col>
+                <ion-button @click="addBatch" class="ion-float-end"
+                  >Add New</ion-button
+                >
+              </ion-col>
+            </ion-row>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-row v-for="(batch, id) in batches" :key="id">
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="stacked">Purchase Date*</ion-label>
+                  <ion-input
+                    v-model="batch.purchaseDate"
+                    type="date"
+                    @input="batch.purchaseDate = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="floating">Purchase Price*</ion-label>
+                  <ion-input
+                    v-model="batch.purchasePrice"
+                    type="number"
+                    @input="batch.purchasePrice = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="floating">Quantity*</ion-label>
+                  <ion-input
+                    v-model="batch.stockQuantity"
+                    @input="batch.stockQuantity = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="stacked">Measurement Unit*</ion-label>
+                  <ion-select
+                    v-model="measurementUnit"
+                    @change="batch.measurementUnit = $event.target.value"
+                    ok-text="Okay"
+                    cancel-text="Dismiss"
+                  >
+                    <ion-select-option :value="am.key" v-for="am in availableMeasurementUnits" :key="am.key">{{am.name}}</ion-select-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-item>
+                  <ion-label position="floating">Selling Price*</ion-label>
+                  <ion-input
+                    v-model="batch.sellingPrice"
+                    @input="batch.sellingPrice = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="6">
+                <ion-button @click="deleteBatch(id)" class="ion-float-end">Delete</ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-card-content>
+        </ion-card>
         <ion-card>
           <ion-card-content v-if="errorMsg" class="error-message">
             {{ errorMsg }}

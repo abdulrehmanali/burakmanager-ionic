@@ -145,15 +145,17 @@
 import { IonContent, IonPage, IonBackButton, modalController } from "@ionic/vue";
 import { reactive, toRefs } from "@vue/reactivity";
 import NewShopInvitation from "@/views/components/models/NewShopInvitation.vue"
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { emitter } from "@/services/emitter";
 import { create } from "@/services/shops.services";
 
 export default {
-  name: "NewShop",
+  name: "EditShop",
   setup() {
     let shopInvitationsModelVue: any;
     const router = useRouter();
+    const route = useRoute();
+    const { id } = route.params;
     const state = reactive({
       name: "",
       address: "",
@@ -175,14 +177,14 @@ export default {
         await shopInvitationsModelVue.dismiss();
       }
     });
-    const createNewShop = async () => {
+    const updateShop = async () => {
       state.errorMsg = "";
       state.disabledCreateButton = true;
       if(!state.name || !state.address){
         state.errorMsg = "Please make sure you enter name and address";
         return;
       }
-      create(state.name,state.address,state.invitations).then(res=>{
+      update(state.name,state.address,state.users).then(res=>{
         state.disabledCreateButton = true;
         router.push("/shops");
       }).catch(err=>{

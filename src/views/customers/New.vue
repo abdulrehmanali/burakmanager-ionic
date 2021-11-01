@@ -12,7 +12,6 @@
       <div id="container">
         <ion-card>
           <ion-card-content>
-            <form @submit.prevent="createNewCustomer(name, contactNumber, email)">
               <ion-grid>
                 <ion-row>
                   <ion-col>
@@ -31,6 +30,7 @@
                       <ion-label position="floating">Contact Number</ion-label>
                       <ion-input
                         v-model="contactNumber"
+                        type="phonenumber"
                         @input="contactNumber = $event.target.value"
                       ></ion-input>
                     </ion-item>
@@ -42,14 +42,14 @@
                       <ion-label position="floating">Email</ion-label>
                       <ion-input
                         v-model="email"
+                        type="email"
                         @input="email = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
                 </ion-row>
               </ion-grid>
-              <ion-button expand="block" type="submit">Create</ion-button>
-            </form>
+              <ion-button expand="block" v-on:click="createNewCustomer()" :disabled="disableSave">Create</ion-button>
           </ion-card-content>
         </ion-card>
         <ion-card>
@@ -83,15 +83,16 @@ export default {
       contactNumber: "",
       email: "",
       errorMsg: "",
+      disableSave:false
     });
-    const createNewCustomer = async (
-      name: string,
-      contactNumber: string,
-      email: string
-    ) => {
+    const createNewCustomer = async () => {
       try {
+        state.disableSave = true;
         await store.create();
         const selectedShop = await store.get('selectedShop');
+        const name = state.name;
+        const contactNumber = state.contactNumber;
+        const email = state.email;
         await db
           .collection("shops")
           .doc(selectedShop)
@@ -103,9 +104,11 @@ export default {
             contactNumber: contactNumber,
             email: email,
           });
+        state.disableSave = false;
         router.back();
       } catch (error) {
         state.errorMsg = error.message;
+        state.disableSave = false;
       }
     };
     return { ...toRefs(state), createNewCustomer };

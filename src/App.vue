@@ -9,9 +9,7 @@
         <ion-content>
           <ion-list id="inbox-list">
             <ion-list-header>{{ user.name }}</ion-list-header>
-            <ion-note>{{
-              selectedShop && user.shops ? user.shops[selectedShop] : ""
-            }}</ion-note>
+            <ion-note>{{ selectedShop.name}}</ion-note>
 
             <ion-menu-toggle
               auto-hide="false"
@@ -44,11 +42,11 @@
               @ionChange="selectShop($event.target.value)"
             >
               <ion-select-option
-                v-for="(shop, key) in user.shops"
-                :key="key"
-                :value="key"
-                :selected="key == selectedShop"
-                >{{ shop }}</ion-select-option
+                v-for="(shop) in userShops"
+                :key="shop.shop.id"
+                :value="shop.shop"
+                :selected="shop.shop.id == selectedShop.id"
+                >{{ shop.shop.name }}</ion-select-option
               >
             </ion-select>
           </ion-item>
@@ -93,7 +91,7 @@ import {
   calculatorOutline,
   calculatorSharp
 } from "ionicons/icons";
-import { db, auth } from "./main";
+import { all } from "@/services/shops.services";
 import { Storage } from "@ionic/storage";
 
 export default defineComponent({
@@ -116,6 +114,7 @@ export default defineComponent({
   setup() {
     const state = reactive({
       user: {},
+      userShops:[],
       selectedShop: "",
     });
     const appPages = [
@@ -160,34 +159,19 @@ export default defineComponent({
     const store = new Storage();
     const setupApp = async () => {
       await store.create();
-      if (!auth.currentUser?.uid) {
-        return;
-      }
-      db.collection("users")
-        .doc(auth.currentUser?.uid)
-        .onSnapshot(async (doc) => {
-          state.user = doc.data() || {};
-          await store.set("currentUser", JSON.stringify(state.user));
-          if (!doc.data()?.shops || !Object.keys(doc.data()?.shops).length) {
-            router.push("/shops/new");
-          } else {
-            const selectedShop = await store.get("selectedShop");
-            if (!selectedShop) {
-              state.selectedShop = Object.keys(doc.data()?.shops)[0];
-              await store.set(
-                "selectedShop",
-                Object.keys(doc.data()?.shops)[0]
-              );
-            } else {
-              state.selectedShop = selectedShop;
-            }
-          }
-        });
+      state.user = await store.get("user");
+      state.selectedShop = JSON.parse(await store.get("selectedShop"));
+      all().then(res=>{
+        state.userShops = res.data.shops;
+      }).catch(err=>{
+        console.log({err});
+        alert('Error Please Check Your Internet');
+      }); 
     };
     setupApp();
-    const selectShop = async (e: string) => {
-      state.selectedShop = e;
-      await store.set("selectedShop", e);
+    const selectShop = async (e: any) => {
+      state.selectedShop = e
+      await store.set("selectedShop", JSON.stringify(e));
     };
 
     return {

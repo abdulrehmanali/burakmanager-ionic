@@ -16,6 +16,9 @@
                   @input="email = $event.target.value"
                 ></ion-input>
               </ion-item>
+              <ion-item v-if="errorMsg.email">
+                <ion-label class="error-text">{{ errorMsg.email.toString() }}</ion-label>
+              </ion-item>
               <ion-item>
                 <ion-label position="floating">Password</ion-label>
                 <ion-input
@@ -23,6 +26,9 @@
                   v-model="password"
                   @input="password = $event.target.value"
                 ></ion-input>
+              </ion-item>
+              <ion-item v-if="errorMsg.password">
+                <ion-label class="error-text">{{ errorMsg.password.toString() }}</ion-label>
               </ion-item>
               <ion-button type="submit" expand="block">Login</ion-button>
             </form>
@@ -35,7 +41,7 @@
           </ion-card-content>
         </ion-card>
         <ion-card>
-          <ion-card-content v-if="errorMsg" class="error-message">
+          <ion-card-content v-if="errorMsg && (!errorMsg.email && !errorMsg.password)" class="error-message">
             {{ errorMsg }}
           </ion-card-content>
         </ion-card>
@@ -48,28 +54,48 @@
 import { reactive, toRefs } from "vue";
 import { IonContent, IonPage } from "@ionic/vue";
 import { useRouter } from "vue-router";
-import { auth } from "../main";
+import { login } from "@/services/user.service"
+import { Storage } from '@ionic/storage';
 
 export default {
   name: "Login",
   setup() {
     const router = useRouter();
+    const store = new Storage();
     const state = reactive({
       email: "",
       password: "",
       errorMsg: "",
     });
     const signInWithEmailAndPassword = async (email: string, password: string) => {
-      try {
-        if (!email || !password) {
-          state.errorMsg = "Email and Password is Required";
+      await store.create()
+      state.errorMsg = '';
+      if (!email || !password) {
+        state.errorMsg = "Email and Password is Required";
+        return;
+      }
+      login(email, password).then(async (res: any)=>{
+        const data = res.data;
+        console.log({data}, data.user, data.token)
+        if(!data.user || !data.token){
+          state.errorMsg = "Error please try again";
           return;
         }
-         await auth.signInWithEmailAndPassword(email, password);
+        await store.set('user',JSON.stringify(data.user));
+        await store.set('token',data.token);
         location.href = "/";
-      } catch (error) {
-        state.errorMsg = error.message;
-      }
+      }).catch(err=>{
+        console.log(err);
+        if(!err.response || !err.response.data){
+          state.errorMsg = "Error please try again";
+          return
+        }
+        if(err.response.data.error) {
+          state.errorMsg = err.response.data.error
+        }else if (err.response.data.errors){
+          state.errorMsg = err.response.data.errors
+        }
+      })
     };
     return {
       ...toRefs(state),
@@ -102,5 +128,9 @@ export default {
   background-color: #f8d7da;
   border-color: #f5c2c7;
   text-align: center;
+}
+
+.error-text {
+  color: #842029;
 }
 </style>

@@ -201,7 +201,7 @@
 import { IonContent, IonPage, modalController } from "@ionic/vue";
 import { reactive, toRefs } from "@vue/reactivity";
 import SelectProductModelVue from "../components/models/SelectProductModel.vue";
-import { emitter } from "../../services/emitter";
+import { emitter } from "@/services/emitter";
 import { trash } from "ionicons/icons";
 import { Storage } from '@ionic/storage';
 import { db } from '@/main';
@@ -225,17 +225,23 @@ export default {
       newProductSku:0,
       errorMsg: ""
     });
-    emitter.on("select_product_event", async (product: any) => {
+    emitter.on("select_product_event", async (ob: any) => {
       state.selectedProducts.push({
-        name: product.name,
-        sku: product.sku,
-        price: product.price,
-        measurementUnit: product.measurementUnit,
-        stockQuantity: product.stockQuantity,
-        createdAt: product.createdAt,
-        lastUpdatedAt: product.lastUpdatedAt
+        name: ob.product.name,
+        sku: ob.product.sku,
+        sellingPrice: ob.product.batches[ob.batchId].sellingPrice,
+        purchasePrice: ob.product.batches[ob.batchId].purchasePrice,
+        measurementUnit: ob.product.batches[ob.batchId].measurementUnit,
+        stockQuantity: ob.product.batches[ob.batchId].stockQuantity,
+        createdAt: ob.product.createdAt,
+        lastUpdatedAt: ob.product.lastUpdatedAt
       });
       await selectProductModelVue.dismiss();
+    });
+    emitter.on("close_product_model", async () => {
+      if (selectProductModelVue) {
+        await selectProductModelVue.dismiss();
+      }
     });
     const openSelectProductModal = async () => {
       selectProductModelVue = await modalController.create({
