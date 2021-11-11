@@ -28,6 +28,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import ('../views/shops/Index.vue'),
     meta:{haveSideBar:true,requiresAuth:true}
   },
+  // {
+  //   path: '/shops/:id',
+  //   component: () => import ('../views/shops/Edit.vue'),
+  //   meta:{haveSideBar:true,requiresAuth:true}
+  // },
   {
     path: '/shops/new',
     component: () => import ('../views/shops/New.vue'),

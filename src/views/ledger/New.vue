@@ -88,14 +88,14 @@
                         <ion-label class="ion-hide-sm-up">Quantity</ion-label>
                         <ion-input
                           type="number"
-                          v-model="product.selectedQuantity"
+                          v-model="product.quantity"
                           @keyup="
-                            product.selectedQuantity =
+                            product.quantity =
                               $event.target.value >= product.stockQuantity
-                                ? product.selectedQuantity
+                                ? product.quantity
                                 : $event.target.value
                           "
-                          :value="product.selectedQuantity"
+                          :value="product.quantity"
                           :maxlength="product.stockQuantity"
                         ></ion-input>
                       </ion-item>
@@ -105,22 +105,22 @@
                         <ion-label class="ion-hide-sm-up">Rate</ion-label>
                         <ion-input
                           type="number"
-                          v-model="product.sellingPrice"
+                          v-model="product.rate"
                           @keyup="
-                            product.sellingPrice =
-                              $event.target.value >= product.purchasePrice
+                            product.rate =
+                              $event.target.value >= product.purchasing_price
                                 ? $event.target.value
-                                : product.sellingPrice
+                                : product.rate
                           "
-                          :value="product.sellingPrice"
-                          :minlength="product.purchasePrice"
+                          :value="product.rate"
+                          :minlength="product.purchasing_price"
                         ></ion-input>
                       </ion-item>
                     </ion-col>
                     <ion-col size="12" size-sm>
                       <ion-label>
                         <span class="ion-hide-sm-up">Total: </span
-                        >{{ product.sellingPrice * product.selectedQuantity }}
+                        >{{ product.rate * product.quantity }}
                       </ion-label>
                     </ion-col>
                     <ion-col size="12" size-sm>
@@ -283,14 +283,13 @@ import {
   IonInput,
   IonSelect,
 } from "@ionic/vue";
-import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
 import { emitter } from "@/services/emitter";
 import SelectProductModelVue from "../components/models/SelectProductModel.vue";
 import SelectCustomerMode from "../components/models/SelectCustomerMode.vue";
 import { trash, pencil } from "ionicons/icons";
-import { Storage } from "@ionic/storage";
+import { createLedgerEntry } from "@/services/ledger.services";
 
 export default {
   name: "NewProduct",
@@ -302,12 +301,11 @@ export default {
     IonSelect,
   },
   setup() {
-    const store = new Storage();
     const state = reactive({
       errorMsg: "",
       type: "credit",
       selectedProducts: [] as any,
-      customer: {},
+      customer: {} as any,
       paymentMethod: "cash",
       bankName: "",
       chequeNumber: "",
@@ -321,13 +319,15 @@ export default {
     });
     emitter.on("select_product_event", async (ob: any) => {
       state.selectedProducts.push({
-        name: ob.product.name,
-        sku: ob.product.sku,
-        sellingPrice: ob.product.batches[ob.batchId].sellingPrice,
-        purchasePrice: ob.product.batches[ob.batchId].purchasePrice,
-        measurementUnit: ob.product.batches[ob.batchId].measurementUnit,
-        stockQuantity: ob.product.batches[ob.batchId].stockQuantity,
-        selectedQuantity: 1,
+        'batch_id':ob.batchId,
+        'product_id':ob.id,
+        name: ob.name,
+        sku: ob.sku,
+        'rate': ob.batches[ob.batchId].selling_price,
+        'purchasing_price': ob.batches[ob.batchId].purchasing_price,
+        'measurement_unit': ob.batches[ob.batchId].measurement_unit,
+        quantity: 1,
+        stockQuantity: ob.batches[ob.batchId].quantity,
       });
       if (state.selectProductModelVue) {
         await state.selectProductModelVue.dismiss();
@@ -340,6 +340,7 @@ export default {
     });
     emitter.on("select_customer_event", async (customer: any) => {
       state.customer = {
+        id: customer.id,
         name: customer.name,
         email: customer.email,
       };
@@ -354,31 +355,19 @@ export default {
     });
     const crateNewEntry = async () => {
       try {
-        await store.create();
-        const selectedShop = await store.get("selectedShop");
-        if (!selectedShop) {
-          new Error("No Shop Seleted.");
-          return;
-        }
-        await db
-          .collection("shops")
-          .doc(selectedShop)
-          .collection("ledger")
-          .add({
-            createdAt: new Date().getTime(),
-            lastUpdatedAt: new Date().getTime(),
+        createLedgerEntry({
             type: state.type,
-            selectedProducts: state.selectedProducts,
-            customer: state.customer,
-            paymentMethod: state.paymentMethod,
-            bankName: state.bankName,
-            chequeNumber: state.chequeNumber,
-            transactionId: state.transactionId,
+            products: state.selectedProducts,
+            'customer_id': state.customer.id,
+            'payment_method': state.paymentMethod,
+            'bank_name': state.bankName,
+            'cheque_number': state.chequeNumber,
+            'transaction_id': state.transactionId,
             total: state.total,
-            amountReceived: state.amountReceived,
-            paymentStatus: state.paymentStatus,
+            'amount_received': state.amountReceived,
+            'payment_status': state.paymentStatus,
             note: state.note,
-          });
+          })
         router.back();
       } catch (error) {
         state.errorMsg = error.message;
@@ -409,7 +398,7 @@ export default {
     const getTotal = () => {
       state.total = state.selectedProducts
         .map((product: any) => {
-          return product.sellingPrice * product.selectedQuantity;
+          return product.rate * product.quantity;
         })
         .reduce((a: any, b: any) => a + b, 0);
       return state.total;

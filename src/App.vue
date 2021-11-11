@@ -37,14 +37,14 @@
             <ion-label>Selected Shop</ion-label>
             <ion-select
               placeholder="Select One"
-              :value="selectedShop"
-              v-model="selectedShop"
               @ionChange="selectShop($event.target.value)"
+              multiple="false"
+              :value="selectedShop.id"
             >
               <ion-select-option
-                v-for="(shop) in userShops"
+                v-for="shop in userShops"
                 :key="shop.shop.id"
-                :value="shop.shop"
+                :value="shop.shop.id"
                 :selected="shop.shop.id == selectedShop.id"
                 >{{ shop.shop.name }}</ion-select-option
               >
@@ -115,7 +115,10 @@ export default defineComponent({
     const state = reactive({
       user: {},
       userShops:[],
-      selectedShop: "",
+      selectedShop: {
+        id:"",
+        name:""
+      } as any,
     });
     const appPages = [
       {
@@ -160,9 +163,18 @@ export default defineComponent({
     const setupApp = async () => {
       await store.create();
       state.user = await store.get("user");
-      state.selectedShop = JSON.parse(await store.get("selectedShop"));
-      all().then(res=>{
+      const selectedShop = JSON.parse(await store.get("selectedShop"));
+      if(selectedShop){
+        state.selectedShop = selectedShop;
+      }
+      all().then(async(res)=>{
         state.userShops = res.data.shops;
+        if(!selectedShop && state.userShops && state.userShops.length > 0){
+          state.selectedShop = state.userShops[0]
+          await store.set("selectedShop", JSON.stringify(state.selectedShop));
+        }else{
+          router.push('/shops/new');
+        }
       }).catch(err=>{
         console.log({err});
         alert('Error Please Check Your Internet');
@@ -170,8 +182,13 @@ export default defineComponent({
     };
     setupApp();
     const selectShop = async (e: any) => {
-      state.selectedShop = e
-      await store.set("selectedShop", JSON.stringify(e));
+      state.userShops.forEach(async (shop: any) => {
+        if(shop.shop.id == e){
+          state.selectedShop = shop.shop
+          await store.set("selectedShop", JSON.stringify(shop.shop));
+          router.push('/');
+        }
+      });
     };
 
     return {

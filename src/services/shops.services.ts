@@ -1,5 +1,5 @@
 import axios from "axios"
-const baseUrl = "http://127.0.0.1:8000/api/";
+const baseUrl = process.env.VUE_APP_API_BASE_URL;
 import { Storage } from '@ionic/storage';
 const store = new Storage();
 
@@ -27,6 +27,20 @@ export const create = async (name: string, address: string, invitations: Array<a
   return axios.post(baseUrl+'shops',{
       name,
       address,
+      invitations
+  },{
+    headers: {
+      'Authorization': token
+    },
+  });
+}
+export const update = async (id: string, name: string, address: string, users: Array<any>, invitations: Array<any>)=>{
+  store.create();
+  const token = await store.get('token');
+  return axios.post(baseUrl+'shops/'+id,{
+      name,
+      address,
+      users,
       invitations
   },{
     headers: {

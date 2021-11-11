@@ -10,7 +10,8 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-spinner v-if="loading" class="loader" />
-      <ion-list>
+      <ion-note v-if="!loading" class="ion-text-center status-text">{{entries.length}} Entries Found</ion-note>
+      <ion-list v-if="entries.length">
         <ion-item
           v-for="(entry) in entries"
           :key="entry.id"
@@ -19,12 +20,12 @@
           <ion-label class="ion-text-capitalize">
             <h2>{{ entry.customer.name }}</h2>
             <p>{{ entry.customer.email }}</p>
-            <span class="badge green-badge">{{ entry.paymentMethod }}</span>
-            <span class="badge blue-badge">{{ entry.paymentStatus }}</span>
+            <span class="badge green-badge">{{ entry.payment_method }}</span>
+            <span class="badge blue-badge">{{ entry.payment_status }}</span>
           </ion-label>
           <ion-label class="ion-text-end ion-text-capitalize">
-          <h1>{{ entry.total >= entry.amountReceived ? entry.total : entry.amountReceived }} {{ entry.type }}</h1>
-          <h2 v-if="entry.total < entry.amountReceived">Pending Payment: {{entry.amountReceived - entry.total}} </h2>
+          <h1>{{ entry.total >= entry.amount_received ? entry.total : entry.amount_received }} {{ entry.type }}</h1>
+          <h2 v-if="entry.total < entry.amount_received">Pending Payment: {{entry.amount_received - entry.total}} </h2>
           </ion-label>
         </ion-item>
       </ion-list>
@@ -43,30 +44,25 @@
 import { IonContent, IonPage, IonFab, IonFabButton } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
-import { db } from "@/main";
 import { reactive, toRefs } from "@vue/reactivity";
-import { Storage } from '@ionic/storage';
+import { allLedgerEntries } from "@/services/ledger.services";
 
 export default {
   name: "LedgerIndex",
   setup() {
-    const store = new Storage();
     const router = useRouter();
     const state = reactive({
       entries: [] as any,
+      errorMsg:"",
       loading: true
     });
     const getLedger = async()=>{
-      await store.create();
-      const selectedShop = await store.get('selectedShop');
-      db.collection("shops").doc(selectedShop).collection("ledger").onSnapshot((doc) => {
-        doc.docs.map((e) => {
-          const entry = e.data();
-          entry.id = e.id;
-          state.entries.push(entry);
-        });
+      allLedgerEntries().then(res=>{
+        state.entries = res.data.entries
         state.loading = false
-      });
+      }).catch(err=>{
+        console.log(err);
+      })
     }
     getLedger();
     return { ...toRefs(state), router, add };
@@ -96,5 +92,10 @@ export default {
 .blue-badge {
   background-color:#438cff;
   color: #ffffff;
+}
+.status-text {
+  width:100%;
+  display:block;
+  margin:5px 0;
 }
 </style>

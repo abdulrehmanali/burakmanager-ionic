@@ -8,7 +8,8 @@
     <ion-content class="ion-padding">
       <ion-searchbar @input="onSearch($event.target.value)" show-cancel-button="focus" animated v-on:ionCancel="onSearch('')"/>
       <ion-spinner v-if="loading" class="loader" />
-      <ion-list>
+      <ion-note v-if="!loading" class="ion-text-center status-text">{{products.length}} Products Found</ion-note>
+      <ion-list v-if="products.length">
         <ion-item
           v-for="(product, key) in products"
           :key="key"
@@ -26,14 +27,14 @@
           </ion-row>
           <ion-row  v-for="(batch,k) in product.batches" :key="k" class="product-batches" v-on:click="onProductClick(product,k)">
             <ion-col size="12">
-              <b>Selling Price: {{ batch.sellingPrice }}</b>
-              <p>{{ batch.stockQuantity }} {{ batch.measurementUnit }} in stock</p>
+              <b>Selling Price: {{ batch.selling_price }}</b>
+              <p>{{ batch.quantity }} {{ batch.measurement_unit }} in stock</p>
             </ion-col>
           </ion-row>
         </ion-grid>
         </ion-item>
       </ion-list>
-      <ion-infinite-scroll
+      <!-- <ion-infinite-scroll
         @ionInfinite="loadMore($event)" 
         threshold="100px" 
         id="infinite-scroll"
@@ -43,71 +44,54 @@
           loading-spinner="bubbles"
           loading-text="Loading more data...">
         </ion-infinite-scroll-content>
-      </ion-infinite-scroll>
+      </ion-infinite-scroll> -->
     </ion-content>
 </template>
 
 <script>
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/vue';
-import { db } from "@/main";
-import { defineComponent, reactive, toRefs } from 'vue';
-import { emitter } from "../../../services/emitter";
-import { Storage } from '@ionic/storage';
+import { useRouter } from "vue-router";
+import { add } from "ionicons/icons";
+import { defineComponent, reactive, toRefs } from "vue";
+import { allProducts } from "@/services/products.services";
+import { emitter } from "@/services/emitter";
 import { closeOutline } from "ionicons/icons";
-import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'SelectProductModel',
   props: {
   },
   setup() {
-    let query;
-    const store = new Storage();
     const router = useRouter();
     const state = reactive({
       products: [],
       search:"",
       loadMoreDisabled: false,
       loading: true,
-      lastDocument:{}
+      lastDocument:{},
+      perPage:10,
+      errorMsg:""
     });
-    const getProducts = async()=>{
+    const getProducts = ()=>{
       state.products = [];
-      await store.create();
-      const selectedShop = await store.get('selectedShop');
-      query = db.collection("shops").doc(selectedShop)
-        .collection("products");
-        if(state.search){
-          query = query.orderBy('name','asc').where('name','>=',state.search);
-        }else{
-          query = query.orderBy('createdAt','desc')
+      allProducts(state.search).then((res)=>{
+        if(res.data.error){
+          state.errorMsg = res.error;
+          return;
         }
-        query = query.limit(10)
-        query.onSnapshot((doc) => {
-          doc.docs.map((e) => {
-            state.products.push(e.data());
-          });
-          if(doc.docs && doc.docs.length){
-            state.lastDocument = doc.docs[doc.docs.length-1]
-          }
-          state.loading = false
-        });
+        state.products = res.data.products;
+        state.loading = false
+      }).catch((err)=>{
+        state.loading = false
+        if(err.response || err.response.data){
+          state.errorMsg = err.response.data.error;
+          return;
+        }
+        state.errorMsg = "Please check your internet and try again";
+      })
     }
     getProducts();
     const loadMore = (ev)=>{
-      query.startAfter(state.lastDocument).onSnapshot((doc) => {
-        doc.docs.map((e) => {
-          state.products.push(e.data());
-          state.lastDocument = e.data();
-        });
-        if(doc.docs && doc.docs.length){
-          state.lastDocument = doc.docs[doc.docs.length-1]
-        }
-        if(doc.docs.length < 10){
-          state.loadMoreDisabled = true
-        }
-        ev.target?.complete()
-      });
+      console.log(ev)
     }
     const onSearch = (toSearch)=>{
       state.search = toSearch;
@@ -115,15 +99,15 @@ export default defineComponent({
         getProducts(); 
       }, 600);
     }
-    const onProductClick = (product,batchId) => {
-      emitter.emit('select_product_event',JSON.parse(JSON.stringify({product,batchId})))
+    const onProductClick = (product,k) => {
+      product.batchId = k;
+      emitter.emit('select_product_event',JSON.parse(JSON.stringify(product)))
     }
     const closeModel = () =>{
       emitter.emit('close_product_model','');
     }
-    return { ...toRefs(state), router, closeOutline, loadMore, onSearch, onProductClick, closeModel};
-  },
-  components: { IonContent, IonHeader, IonTitle, IonToolbar }
+    return { ...toRefs(state), router, add, closeOutline, loadMore, onSearch, onProductClick, closeModel};
+  }
 });
 </script>
 <style scoped>

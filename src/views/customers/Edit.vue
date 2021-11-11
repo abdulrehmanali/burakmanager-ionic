@@ -12,7 +12,6 @@
       <div id="container">
         <ion-card>
           <ion-card-content>
-            <form @submit.prevent="saveCustomer(id, name, contactNumber, email)">
               <ion-grid>
                 <ion-row>
                   <ion-col>
@@ -51,8 +50,7 @@
                   </ion-col>
                 </ion-row>
               </ion-grid>
-              <ion-button expand="block" type="submit" :disabled="disableSave">Save</ion-button>
-            </form>
+              <ion-button expand="block" type="submit" :disabled="disableSave" @click="saveCustomer()">Save</ion-button>
           </ion-card-content>
         </ion-card>
         <ion-card>
@@ -78,44 +76,34 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
-import { db } from "@/main";
-import router from "@/router";
+import { updateCustomer, getCustomer } from "@/services/customers.services";
+import { IonContent, IonPage, IonBackButton, IonButton } from "@ionic/vue";
 import { reactive, toRefs } from "@vue/reactivity";
 import { useRoute } from "vue-router";
-import { Storage } from '@ionic/storage';
+import router from "@/router";
 
 export default {
   name: "EditCustomer",
   components: {
     IonContent,
     IonPage,
-    IonBackButton
+    IonBackButton,
+    IonButton
   },
   setup() {
-    const store = new Storage();
     const route = useRoute();
     const { id } = route.params;
     const state = reactive({
-      customer: {},
-      id: "",
+      customer: {} as any,
+      id: id as string,
       errorMsg: "",
       disableSave:false
     });
-    
-    state.id = id as any;
-    const getCustomer = async (id: string) => {
+    const getCustomerFromServer = async (id: string) => {
       try {
         state.disableSave = true;
-        await store.create();
-        const selectedShop = await store.get('selectedShop');
-        const customer = await db
-          .collection("shops")
-          .doc(selectedShop)
-          .collection("customers")
-          .doc(id)
-          .get();
-        state.customer = customer.data() as any;
+        const customer = await getCustomer(id) as any;
+        state.customer = customer.data.customer;
         state.disableSave = false;
       } catch (error) {
         state.errorMsg = error.message;
@@ -123,26 +111,10 @@ export default {
       }
     };
 
-    const saveCustomer = async (
-      id: string,
-      name: string,
-      contactNumber: string,
-      email: string
-    ) => {
+    const saveCustomer = async () => {
       try {
         state.disableSave = true;
-        const selectedShop = await store.get('selectedShop');
-        await db
-          .collection("shops")
-          .doc(selectedShop)
-          .collection("customers")
-          .doc(id)
-          .set({
-            lastUpdatedAt: new Date().getTime(),
-            name: name,
-            contactNumber: contactNumber,
-            email: email,
-          });
+        updateCustomer(state.id, state.customer.name, state.customer.email, state.customer.phoneNumber)
         router.back();
         state.disableSave = false;
       } catch (error) {
@@ -150,7 +122,7 @@ export default {
         state.disableSave = false;
       }
     };
-    getCustomer(id.toString());
+    getCustomerFromServer(id.toString());
     return { ...toRefs(state), saveCustomer, router };
   },
 };

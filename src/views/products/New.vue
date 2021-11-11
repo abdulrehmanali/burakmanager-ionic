@@ -64,9 +64,9 @@
                 <ion-item>
                   <ion-label position="stacked">Purchase Date*</ion-label>
                   <ion-input
-                    v-model="batch.purchaseDate"
+                    v-model="batch.purchased_at"
                     type="date"
-                    @input="batch.purchaseDate = $event.target.value"
+                    @input="batch.purchased_at = $event.target.value"
                   ></ion-input>
                 </ion-item>
               </ion-col>
@@ -74,9 +74,9 @@
                 <ion-item>
                   <ion-label position="floating">Purchase Price*</ion-label>
                   <ion-input
-                    v-model="batch.purchasePrice"
+                    v-model="batch.purchasing_price"
                     type="number"
-                    @input="batch.purchasePrice = $event.target.value"
+                    @input="batch.purchasing_price = $event.target.value"
                   ></ion-input>
                 </ion-item>
               </ion-col>
@@ -84,8 +84,8 @@
                 <ion-item>
                   <ion-label position="floating">Quantity*</ion-label>
                   <ion-input
-                    v-model="batch.stockQuantity"
-                    @input="batch.stockQuantity = $event.target.value"
+                    v-model="batch.quantity"
+                    @input="batch.quantity = $event.target.value"
                   ></ion-input>
                 </ion-item>
               </ion-col>
@@ -93,8 +93,8 @@
                 <ion-item>
                   <ion-label position="stacked">Measurement Unit*</ion-label>
                   <ion-select
-                    v-model="measurementUnit"
-                    @change="batch.measurementUnit = $event.target.value"
+                    v-model="measurement_unit"
+                    @change="batch.measurement_unit = $event.target.value"
                     ok-text="Okay"
                     cancel-text="Dismiss"
                   >
@@ -106,8 +106,8 @@
                 <ion-item>
                   <ion-label position="floating">Selling Price*</ion-label>
                   <ion-input
-                    v-model="batch.sellingPrice"
-                    @input="batch.sellingPrice = $event.target.value"
+                    v-model="batch.selling_price"
+                    @input="batch.selling_price = $event.target.value"
                   ></ion-input>
                 </ion-item>
               </ion-col>
@@ -117,7 +117,7 @@
             </ion-row>
           </ion-card-content>
         </ion-card>
-        <ion-button expand="block" type="submit" @click="createNewProduct()" :disabled="disableCreateButton">Create</ion-button>
+        <ion-button expand="block" type="submit" @click="createNewProduct()" :disabled="disableCreateButton">Save</ion-button>
         <ion-card>
           <ion-card-content v-if="errorMsg" class="error-message">
             {{ errorMsg }}
@@ -131,10 +131,9 @@
 <script lang="ts">
 import { IonContent, IonPage, IonBackButton, IonSelect } from "@ionic/vue";
 import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
-import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
-import { Storage } from '@ionic/storage';
+import { createProduct } from "@/services/products.services";
 
 export default {
   name: "NewProduct",
@@ -145,17 +144,10 @@ export default {
     IonSelect
   },
   setup() {
-    const store = new Storage();
     const state = reactive({
       name: "",
-      price: "",
-      sku: "",
-      salePrice: "",
-      stockQuantity: "",
-      onSale: "",
-      inventoryEnabled: "",
+      sku:"",
       errorMsg: "",
-      measurementUnit: "piece",
       batches:[] as any,
       disableCreateButton:false,
       availableMeasurementUnits:[
@@ -234,52 +226,37 @@ export default {
       if(haveNullBatch){
         return;
       }
-      await store.create();
-      const selectedShop = await store.get('selectedShop');
-      if(!selectedShop){
-        state.errorMsg = "Shop is not selected";
-        state.disableCreateButton = false;
-        return;
-      }
-      try {
-        const productExist = await db
-          .collection("shops")
-          .doc(selectedShop)
-          .collection("products")
-          .doc(state.sku).get()
-        if(productExist.exists || productExist.data() != null){
-          state.errorMsg = "Product with this SKU already exists";
-          state.disableCreateButton = false;
+      createProduct(state.name,state.sku,state.batches).then((res: any)=>{
+         if(res.data.error){
+          state.errorMsg = res.response.data.error;
           return;
         }
-        await db
-          .collection("shops")
-          .doc(selectedShop)
-          .collection("products")
-          .doc(state.sku)
-          .set({
-            createdAt: new Date().getTime(),
-            lastUpdatedAt: new Date().getTime(),
-            name: state.name,
-            sku: state.sku,
-            batches:state.batches
-          });
-        router.push("/products");
-      } catch (error) {
-        state.errorMsg = error.message;
         state.disableCreateButton = false;
-      }
+        router.push("/products");
+      }).catch((res: any)=>{
+        state.disableCreateButton = false;
+        if(!res.response.data.error || !res.response.data.errors){
+          state.errorMsg = "Error Please check your internet conneciton and try again";
+          return;
+        }
+        if(res.response.data.error){
+          state.errorMsg = res.response.data.error;
+        }
+        if(res.response.data.errors){
+          state.errorMsg = res.response.data.errors;
+        }
+      })
     };
     const onSkuInput = (sku: any)=>{
       state.sku = sku.replaceAll(/^\s+|\s+$/g,'').replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
     }
     const addBatch = ()=>{
       state.batches.push({
-        purchaseDate:"",
-        purchasePrice: 0,
-        stockQuantity: 0,
-        measurementUnit:"piece",
-        sellingPrice:0
+        'purchased_at':"",
+        'purchasing_price': 0,
+        quantity: 0,
+        'measurement_unit':"piece",
+        'selling_price':0
       });
     }
     const deleteBatch = (id: any)=>{

@@ -34,7 +34,7 @@
               <ion-label>
                 <h2>{{ product.name }}</h2>
                 <p>
-                  {{ product.stockQuantity }} {{ product.measurementUnit }}
+                  {{ product.quantity }} {{ product.measurement_unit }}
                 </p>
               </ion-label>
               <ion-icon
@@ -79,8 +79,8 @@
                     <ion-col>
                       <ion-label>{{ product.name }}</ion-label>
                       <p>
-                        {{ product.stockQuantity }}
-                        {{ product.measurementUnit }} available
+                        {{ product.quantity }}
+                        {{ product.measurement_unit }} available
                       </p>
                     </ion-col>
                     <ion-col>
@@ -88,14 +88,14 @@
                         <ion-input
                           type="number"
                           placeholder="Quantity"
-                          :max="selectedProducts[key].stockQuantity"
+                          :max="selectedProducts[key].quantity"
                           min="0"
                           @keyup="forOnePieceQuantityUpdate(key, $event.target.value)"
                         ></ion-input>
                       </ion-item>
                     </ion-col>
                     <ion-col>
-                      <ion-label>{{ product.measurementUnit }}</ion-label>
+                      <ion-label>{{ product.measurement_unit }}</ion-label>
                     </ion-col>
                   </ion-row>
                 </ion-grid>
@@ -149,14 +149,14 @@
                     </ion-col>
                     <ion-col>
                       <ion-label
-                        >{{ product.stockQuantity }}
-                        {{ product.measurementUnit }}</ion-label
+                        >{{ product.quantity }}
+                        {{ product.measurement_unit }}</ion-label
                       >
                     </ion-col>
                     <ion-col>
                       <ion-label
                         >{{ calculateAdditionalRequired(product) }}
-                        {{ product.measurementUnit }}</ion-label
+                        {{ product.measurement_unit }}</ion-label
                       >
                     </ion-col>
                   </ion-row>
@@ -226,15 +226,16 @@ export default {
       errorMsg: ""
     });
     emitter.on("select_product_event", async (ob: any) => {
+      console.log(ob)
       state.selectedProducts.push({
-        name: ob.product.name,
-        sku: ob.product.sku,
-        sellingPrice: ob.product.batches[ob.batchId].sellingPrice,
-        purchasePrice: ob.product.batches[ob.batchId].purchasePrice,
-        measurementUnit: ob.product.batches[ob.batchId].measurementUnit,
-        stockQuantity: ob.product.batches[ob.batchId].stockQuantity,
-        createdAt: ob.product.createdAt,
-        lastUpdatedAt: ob.product.lastUpdatedAt
+        name: ob.name,
+        sku: ob.sku,
+        'selling_price': ob.batches[ob.batchId].selling_price,
+        'purchasing_price': ob.batches[ob.batchId].purchasing_price,
+        'measurement_unit': ob.batches[ob.batchId].measurement_unit,
+        quantity: ob.batches[ob.batchId].quantity,
+        'created_at': ob.created_at,
+        'updated_at': ob.updated_at
       });
       await selectProductModelVue.dismiss();
     });
@@ -260,7 +261,7 @@ export default {
       for (let i = 0; i < state.selectedProducts.length; i++) {
         const selectedProduct = state.selectedProducts[i];
         maxQuantity.push(
-          selectedProduct.stockQuantity / selectedProduct.quantityRequiredForOneProduct
+          selectedProduct.quantity / selectedProduct.quantityRequiredForOneProduct
         );
       }
       state.maxProducibleProducts = Math.round(Math.min(...maxQuantity));
@@ -272,8 +273,8 @@ export default {
     const calculateAdditionalRequired = (product: any) => {
       let additionalRequired = 0;
       const customQuantity = state.customQuantity * product.quantityRequiredForOneProduct;
-      if (customQuantity > product.stockQuantity) {
-        additionalRequired = customQuantity - product.stockQuantity;
+      if (customQuantity > product.quantity) {
+        additionalRequired = customQuantity - product.quantity;
       }
       return additionalRequired;
     };

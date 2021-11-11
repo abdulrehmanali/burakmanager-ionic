@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage } from "@ionic/vue";
+import { IonContent, IonPage, onIonViewWillEnter } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { reactive, toRefs } from "@vue/reactivity";
 import { add } from "ionicons/icons";
@@ -60,13 +60,16 @@ export default {
       user: {}
     });
     state.shops = [];
-    all().then(async(res)=>{
+    state.loading = true;
+    onIonViewWillEnter(() => {
+      all().then(async(res)=>{
         await store.create();
         state.user = await store.get("user");
         state.shops = res.data.shops;
         state.loading = false
-    }).catch(err=>{
-      alert("Please Check your internet")
+      }).catch(err=>{
+        alert("Please Check your internet")
+      });
     });
     return { router,add, ...toRefs(state) };
   },

@@ -81,7 +81,7 @@ export default {
           state.errorMsg = "Error please try again";
           return;
         }
-        await store.set('user',JSON.stringify(data.user));
+        await store.set('user',data.user);
         await store.set('token',data.token);
         location.href = "/";
       }).catch(err=>{

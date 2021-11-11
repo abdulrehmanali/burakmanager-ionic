@@ -29,9 +29,9 @@
                     <ion-item>
                       <ion-label position="floating">Contact Number</ion-label>
                       <ion-input
-                        v-model="contactNumber"
+                        v-model="phoneNumber"
                         type="phonenumber"
-                        @input="contactNumber = $event.target.value"
+                        @input="phoneNumber = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
@@ -64,52 +64,37 @@
 
 <script lang="ts">
 import { IonContent, IonPage, IonBackButton } from "@ionic/vue";
-import { db } from "@/main";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
-import { Storage } from '@ionic/storage';
+import { createCustomer } from "@/services/customers.services";
 
 export default {
-  name: "NewProduct",
+  name: "NewCustomer",
   components: {
     IonContent,
     IonPage,
     IonBackButton
   },
   setup() {
-    const store = new Storage();
     const state = reactive({
       name: "",
-      contactNumber: "",
+      phoneNumber: "",
       email: "",
       errorMsg: "",
       disableSave:false
     });
     const createNewCustomer = async () => {
-      try {
-        state.disableSave = true;
-        await store.create();
-        const selectedShop = await store.get('selectedShop');
-        const name = state.name;
-        const contactNumber = state.contactNumber;
-        const email = state.email;
-        await db
-          .collection("shops")
-          .doc(selectedShop)
-          .collection("customers")
-          .add({
-            createdAt: new Date().getTime(),
-            lastUpdatedAt: new Date().getTime(),
-            name: name,
-            contactNumber: contactNumber,
-            email: email,
-          });
+      state.disableSave = true;
+      createCustomer(state.name, state.email, state.phoneNumber).then(res=>{
+        router.push('/customers');
+      }).catch(error=>{
         state.disableSave = false;
-        router.back();
-      } catch (error) {
-        state.errorMsg = error.message;
-        state.disableSave = false;
-      }
+        if(!error.response || !error.response.data){
+          state.errorMsg = "Error please try again";
+          return;
+        }
+        state.errorMsg = error.response.data.error;
+      })
     };
     return { ...toRefs(state), createNewCustomer };
   },

@@ -11,12 +11,13 @@
     <ion-content :fullscreen="true">
       <ion-searchbar @input="onSearch($event.target.value)" show-cancel-button="focus" animated v-on:ionCancel="onSearch('')"/>
       <ion-spinner v-if="loading" class="loader" />
-      <ion-list>
+      <ion-note v-if="!loading" class="ion-text-center status-text">{{products.length}} Products Found</ion-note>
+      <ion-list v-if="products.length">
         <ion-item
           v-for="(product, key) in products"
           :key="key"
           :value="key"
-          v-on:click="router.push('/products/' + product.sku)"
+          v-on:click="router.push('/products/' + product.id)"
         >
           <ion-label>
             <h2>{{ product.name }}</h2>
@@ -28,17 +29,17 @@
           </ion-note>
         </ion-item>
       </ion-list>
-      <ion-infinite-scroll
+      <!-- <ion-infinite-scroll
         @ionInfinite="loadMore($event)" 
         threshold="100px" 
         id="infinite-scroll"
-        :disabled="loadMoreDisabled"
+        :disabled="loadMoreDisabled || perPage > products.length"
       >
         <ion-infinite-scroll-content
           loading-spinner="bubbles"
           loading-text="Loading more data...">
         </ion-infinite-scroll-content>
-      </ion-infinite-scroll>
+      </ion-infinite-scroll> -->
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <router-link to="/products/new">
           <ion-fab-button>
@@ -51,63 +52,48 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonFab, IonFabButton, IonInfiniteScroll, IonInfiniteScrollContent } from "@ionic/vue";
+import { IonContent, IonPage, IonFab, IonFabButton, onIonViewWillEnter } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
-import { db } from "@/main";
 import { reactive, toRefs } from "@vue/reactivity";
-import { Storage } from '@ionic/storage';
+import { allProducts } from "@/services/products.services";
 
 export default {
   name: "Products",
   setup() {
-    let query: any;
-    const store = new Storage();
     const router = useRouter();
     const state = reactive({
       products: [] as any,
       search:"",
       loadMoreDisabled: false,
       loading: true,
-      lastDocument:{}
+      lastDocument:{},
+      perPage:10,
+      errorMsg:""
     });
-    const getProducts = async()=>{
+    const getProducts = ()=>{
       state.products = [];
-      await store.create();
-      const selectedShop = await store.get('selectedShop');
-      query = db.collection("shops").doc(selectedShop)
-        .collection("products");
-        if(state.search){
-          query = query.orderBy('name','asc').where('name','>=',state.search);
-        }else{
-          query = query.orderBy('createdAt','desc')
+      allProducts(state.search).then((res: any)=>{
+        if(res.data.error){
+          state.errorMsg = res.error;
+          return;
         }
-        query = query.limit(10)
-        query.onSnapshot((doc: any) => {
-          doc.docs.map((e: any) => {
-            state.products.push(e.data());
-          });
-          if(doc.docs && doc.docs.length){
-            state.lastDocument = doc.docs[doc.docs.length-1]
-          }
-          state.loading = false
-        });
+        state.products = res.data.products;
+        state.loading = false
+      }).catch((err: any)=>{
+        state.loading = false
+        if(err.response || err.response.data){
+          state.errorMsg = err.response.data.error;
+          return;
+        }
+        state.errorMsg = "Please check your internet and try again";
+      })
     }
-    getProducts();
+    onIonViewWillEnter(() => {
+      getProducts();
+    });
     const loadMore = (ev: any)=>{
-      query.startAfter(state.lastDocument).onSnapshot((doc: any) => {
-        doc.docs.map((e: any) => {
-          state.products.push(e.data());
-          state.lastDocument = e.data();
-        });
-        if(doc.docs && doc.docs.length){
-          state.lastDocument = doc.docs[doc.docs.length-1]
-        }
-        if(doc.docs.length < 10){
-          state.loadMoreDisabled = true
-        }
-        ev.target?.complete()
-      });
+      console.log(ev)
     }
     const onSearch = (toSearch: string)=>{
       state.search = toSearch;
@@ -121,11 +107,15 @@ export default {
     IonContent,
     IonPage,
     IonFab,
-    IonFabButton,
-    IonInfiniteScroll,
-    IonInfiniteScrollContent
+    IonFabButton
   },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.status-text {
+  width:100%;
+  display:block;
+  margin:5px 0;
+}
+</style>

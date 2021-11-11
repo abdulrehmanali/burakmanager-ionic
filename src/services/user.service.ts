@@ -1,5 +1,5 @@
 import axios from "axios"
-const baseUrl = "http://127.0.0.1:8000/api/"
+const baseUrl = process.env.VUE_APP_API_BASE_URL;
 export const login = (email: string, password: string)=>{
   return axios.post(baseUrl+'login',{
     email,

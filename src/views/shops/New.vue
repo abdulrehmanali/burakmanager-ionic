@@ -183,7 +183,7 @@ export default {
         return;
       }
       create(state.name,state.address,state.invitations).then(res=>{
-        state.disabledCreateButton = true;
+        state.disabledCreateButton = false;
         router.push("/shops");
       }).catch(err=>{
         state.disabledCreateButton = false;

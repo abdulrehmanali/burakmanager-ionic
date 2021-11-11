@@ -11,6 +11,7 @@
     <ion-content :fullscreen="true">
       <ion-searchbar></ion-searchbar>
       <ion-spinner v-if="loading" class="loader" />
+      <ion-note v-if="!loading" class="ion-text-center status-text">{{customers.length}} Customers Found</ion-note>
       <ion-list>
         <ion-item
           v-for="(customer, key) in customers"
@@ -39,33 +40,23 @@
 import { IonContent, IonPage, IonFab, IonFabButton } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
-import { db } from "@/main";
 import { reactive, toRefs } from "@vue/reactivity";
-import { Storage } from '@ionic/storage';
+import { allCustomers } from "@/services/customers.services";
 
 export default {
   name: "Customers",
   setup() {
-    const store = new Storage();
     const router = useRouter();
     const state = reactive({
       customers: [] as any,
       loading:true
     });
     const getCustomers = async ()=>{
-      await store.create();
-      state.customers = [];
-      const selectedShop = await store.get('selectedShop');
-      db.collection("shops")
-      .doc(selectedShop)
-      .collection("customers")
-      .onSnapshot((doc) => {
-        doc.docs.map((e) => {
-          const c = e.data();
-          c.id = e.id;
-          state.customers.push(c);
-        });
-        state.loading = false
+      allCustomers().then(async(res)=>{
+          state.customers = res.data.customers;
+          state.loading = false
+      }).catch(err=>{
+        alert("Please Check your internet")
       });
     }
     getCustomers();
@@ -80,4 +71,10 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.status-text {
+  width:100%;
+  display:block;
+  margin:5px 0;
+}
+</style>
