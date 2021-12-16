@@ -16,6 +16,7 @@
           v-for="(entry) in entries"
           :key="entry.id"
           :value="entry.id"
+          v-on:click="openPdf(entry.id)"
         >
           <ion-label class="ion-text-capitalize">
             <h2>{{ entry.customer.name }}</h2>
@@ -41,11 +42,13 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonFab, IonFabButton } from "@ionic/vue";
+import { IonContent, IonPage, IonFab, IonFabButton, onIonViewWillEnter, isPlatform } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
 import { reactive, toRefs } from "@vue/reactivity";
-import { allLedgerEntries } from "@/services/ledger.services";
+import { allLedgerEntries, getReciptUrl } from "@/services/ledger.services";
+import { Browser } from '@capacitor/browser';
+import { Share } from '@capacitor/share';
 
 export default {
   name: "LedgerIndex",
@@ -56,16 +59,34 @@ export default {
       errorMsg:"",
       loading: true
     });
-    const getLedger = async()=>{
+    const getLedger = ()=>{
       allLedgerEntries().then(res=>{
         state.entries = res.data.entries
         state.loading = false
       }).catch(err=>{
         console.log(err);
-      })
+      });
     }
-    getLedger();
-    return { ...toRefs(state), router, add };
+    const openPdf = async (id: any)=>{
+      try {
+        const url = await getReciptUrl(id);
+        await Share.share({
+          title: ('Recipt #'+id),
+          text:( 'Recipt #'+id),
+          url: url,
+          dialogTitle:( 'Recipt #'+id),
+        });
+
+        //Browser.open({ url: ('http://docs.google.com/gview?embedded=true&url='+url)});
+      } catch(e) {
+        console.log(e)
+        alert(e);
+      }
+    }
+    onIonViewWillEnter(() => {
+      getLedger();
+    });
+    return { ...toRefs(state),openPdf, router, add };
   },
   components: {
     IonContent,

@@ -22,7 +22,7 @@ export const getProduct = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+selectedShop['id']+'/products'+id,{
+  return axios.get(baseUrl+'shops/'+selectedShop['id']+'/products/'+id,{
     headers: {
       'Authorization': token
     } 

@@ -57,13 +57,18 @@ export default {
     const state = reactive({
       shops: [],
       loading: true,
-      user: {}
+      user: {},
+      selectedShop:{}
     });
     state.shops = [];
     state.loading = true;
-    onIonViewWillEnter(() => {
+    onIonViewWillEnter(async () => {
+      await store.create();
+      state.selectedShop = JSON.parse(await store.get("selectedShop"));
+      if(!state.selectedShop){
+        return;
+      }
       all().then(async(res)=>{
-        await store.create();
         state.user = await store.get("user");
         state.shops = res.data.shops;
         state.loading = false

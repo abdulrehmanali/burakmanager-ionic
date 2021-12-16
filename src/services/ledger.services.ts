@@ -47,3 +47,11 @@ export const updateLedgerEntry = async (id: string, entry: any)=>{
     },
   });
 }
+
+export const getReciptUrl = async (id: any)=>{
+  store.create();
+  const token = await store.get('token');
+  let selectedShop = await store.get('selectedShop');
+  selectedShop = JSON.parse(selectedShop);
+  return baseUrl+'shops/'+selectedShop['id']+'/ledger/'+id+'/recipt';
+}

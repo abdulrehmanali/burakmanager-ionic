@@ -28,6 +28,12 @@
                   @input="address = $event.target.value"
                 ></ion-textarea>
               </ion-item>
+              <ion-item>
+                <ion-label>Currency</ion-label>
+                <ion-select placeholder="Select Currency" v-on:change="currency = $event.target.value" :value="currency">
+                  <ion-select-option v-for="(c,k) in currencyOptions" :key="k" :value="k">{{c.name}}</ion-select-option>
+                </ion-select>
+              </ion-item>
             </ion-list>
           </ion-card-content>
         </ion-card>
@@ -142,12 +148,13 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonBackButton, modalController } from "@ionic/vue";
+import { IonContent, IonPage, IonBackButton, modalController, IonSelect } from "@ionic/vue";
 import { reactive, toRefs } from "@vue/reactivity";
 import NewShopInvitation from "@/views/components/models/NewShopInvitation.vue"
 import { useRouter } from "vue-router";
 import { emitter } from "@/services/emitter";
 import { create } from "@/services/shops.services";
+import currencyOptions from "@/data/currency-details.json";
 
 export default {
   name: "NewShop",
@@ -160,6 +167,8 @@ export default {
       invitations:[] as any,
       disabledCreateButton:false,
       errorMsg: "",
+      currency:"PKR",
+      currencyOptions
     });
     state.name = "";
     state.address = "";
@@ -182,7 +191,7 @@ export default {
         state.errorMsg = "Please make sure you enter name and address";
         return;
       }
-      create(state.name,state.address,state.invitations).then(res=>{
+      create(state.name,state.address,state.currency,state.invitations).then(res=>{
         state.disabledCreateButton = false;
         router.push("/shops");
       }).catch(err=>{
@@ -211,7 +220,8 @@ export default {
   components: {
     IonContent,
     IonPage,
-    IonBackButton
+    IonBackButton,
+    IonSelect
   },
 };
 </script>

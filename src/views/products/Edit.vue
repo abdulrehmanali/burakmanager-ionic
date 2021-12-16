@@ -61,9 +61,9 @@
           </ion-card-header>
           <ion-card-content>
             <ion-row v-for="(batch, id) in product.batches" :key="id">
-              <ion-col size="6">
+              <ion-col size="12" size-sm="6">
                 <ion-item>
-                  <ion-label position="stacked">Purchase Date*</ion-label>
+                  <ion-label>Purchase Date*: </ion-label>
                   <ion-input
                     v-model="batch.purchased_at"
                     type="date"
@@ -72,9 +72,20 @@
                   ></ion-input>
                 </ion-item>
               </ion-col>
-              <ion-col size="6">
+              <ion-col size="12" size-sm="6">
                 <ion-item>
-                  <ion-label position="floating">Purchase Price*</ion-label>
+                  <ion-label>Expiry Date: </ion-label>
+                  <ion-input
+                    v-model="batch.expire_at"
+                    type="date"
+                    @input="batch.expire_at = $event.target.value"
+                    :value="batch.expire_at?Intl.DateTimeFormat('sv-SE').format(new Date(batch.expire_at)):''"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-sm="6">
+                <ion-item>
+                  <ion-label>Purchase Price*: </ion-label>
                   <ion-input
                     v-model="batch.purchasing_price"
                     type="number"
@@ -83,9 +94,19 @@
                   ></ion-input>
                 </ion-item>
               </ion-col>
-              <ion-col size="6">
+              <ion-col size="12" size-sm="6">
                 <ion-item>
-                  <ion-label position="floating">Quantity*</ion-label>
+                  <ion-label>Selling Price*: </ion-label>
+                  <ion-input
+                    v-model="batch.selling_price"
+                    @input="batch.selling_price = $event.target.value"
+                    :value="batch.selling_price"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-sm="6">
+                <ion-item>
+                  <ion-label>Quantity*: </ion-label>
                   <ion-input
                     v-model="batch.quantity"
                     @input="batch.quantity = $event.target.value"
@@ -93,9 +114,9 @@
                   ></ion-input>
                 </ion-item>
               </ion-col>
-              <ion-col size="6">
+              <ion-col size="12" size-sm="6">
                 <ion-item>
-                  <ion-label position="stacked">Measurement Unit*</ion-label>
+                  <ion-label>Measurement Unit*: </ion-label>
                   <ion-select
                     v-model="batch.measurement_unit"
                     @change="batch.measurement_unit = $event.target.value"
@@ -106,18 +127,28 @@
                   </ion-select>
                 </ion-item>
               </ion-col>
-              <ion-col size="6">
+              <ion-col size="12" size-sm="6">
                 <ion-item>
-                  <ion-label position="floating">Selling Price*</ion-label>
-                  <ion-input
-                    v-model="batch.selling_price"
-                    @input="batch.selling_price = $event.target.value"
-                    :value="batch.selling_price"
-                  ></ion-input>
+                  <ion-label>Status: </ion-label>
+                  <ion-select
+                    @change="batch.status = $event.target.value"
+                    ok-text="Okay"
+                    cancel-text="Dismiss"
+                    value="active"
+                  >
+                    <ion-select-option value="active" selected>Active</ion-select-option>
+                    <ion-select-option value="in-production" selected>In Production</ion-select-option>
+                    <ion-select-option value="in-quarantine" selected>In Quarantine</ion-select-option>
+                    <ion-select-option value="on-hold" selected>On Hold</ion-select-option>
+                    <ion-select-option value="expired" selected>Expired</ion-select-option>
+                    <ion-select-option value="out-of-stock" selected>Out Of Stock</ion-select-option>
+                  </ion-select>
                 </ion-item>
               </ion-col>
-              <ion-col size="6">
-                <ion-button @click="deleteBatch(id)" class="ion-float-end">Delete</ion-button>
+              <ion-col size="12" size-sm="6">
+                <ion-item>
+                  <ion-button @click="deleteBatch(id)" class="ion-float-end" color="danger">Delete</ion-button>
+                </ion-item>
               </ion-col>
             </ion-row>
           </ion-card-content>
@@ -215,6 +246,18 @@ export default {
     };
 
     const saveProduct = async () => {
+      if(!state.product.name){
+        state.errorMsg = "Product Name is required";
+        return;
+      }
+      if(!state.product.sku){
+        state.errorMsg = "Product SKU is required";
+        return;
+      }
+      if(!state.product.batches || !state.product.batches.length){
+        state.errorMsg = "Atleast one Batch is required";
+        return;
+      }
       updateProduct(state.product.id,state.product.name,state.product.sku,state.product.batches).then((res: any)=>{
          if(res.data.error){
           state.errorMsg = res.response.data.error;

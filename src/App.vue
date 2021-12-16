@@ -32,6 +32,14 @@
                 <ion-label>{{ p.title }}</ion-label>
               </ion-item>
             </ion-menu-toggle>
+            <ion-item v-on:click='logOut()'>
+              <ion-icon
+                  slot="start"
+                  :ios="logOutSharp"
+                  :md="logOutOutline"
+              ></ion-icon>
+            <ion-label>Log Out</ion-label>
+            </ion-item>
           </ion-list>
           <ion-item>
             <ion-label>Selected Shop</ion-label>
@@ -89,10 +97,13 @@ import {
   personOutline,
   personSharp,
   calculatorOutline,
-  calculatorSharp
+  calculatorSharp,
+  logOutOutline,
+  logOutSharp
 } from "ionicons/icons";
 import { all } from "@/services/shops.services";
 import { Storage } from "@ionic/storage";
+import { emitter } from "@/services/emitter";
 
 export default defineComponent({
   name: "App",
@@ -160,25 +171,31 @@ export default defineComponent({
     ];
     const router = useRouter();
     const store = new Storage();
+    let selectedShop = "";
+    const loadShops = ()=>{
+      all().then(async(res)=>{
+        state.userShops = res.data.shops;
+        if(!state.userShops || state.userShops.length == 0) {
+          router.push('/shops/new');
+        }else if(!selectedShop){
+          state.selectedShop = state.userShops[0]
+          await store.set("selectedShop", JSON.stringify(state.selectedShop));
+        }
+      }).catch(()=>{
+        alert('Please check your internet');
+      }); 
+      }
     const setupApp = async () => {
       await store.create();
       state.user = await store.get("user");
-      const selectedShop = JSON.parse(await store.get("selectedShop"));
+      if(!state.user){
+        return;
+      }
+      selectedShop = JSON.parse(await store.get("selectedShop"));
       if(selectedShop){
         state.selectedShop = selectedShop;
       }
-      all().then(async(res)=>{
-        state.userShops = res.data.shops;
-        if(!selectedShop && state.userShops && state.userShops.length > 0){
-          state.selectedShop = state.userShops[0]
-          await store.set("selectedShop", JSON.stringify(state.selectedShop));
-        }else{
-          router.push('/shops/new');
-        }
-      }).catch(err=>{
-        console.log({err});
-        alert('Error Please Check Your Internet');
-      }); 
+      loadShops();
     };
     setupApp();
     const selectShop = async (e: any) => {
@@ -190,6 +207,14 @@ export default defineComponent({
         }
       });
     };
+    const logOut = async ()=>{
+      await store.clear();
+      router.push('/login');
+    }
+
+    emitter.on("sidebar_load_shops", () => {
+      loadShops();
+    });
 
     return {
       ...toRefs(state),
@@ -209,6 +234,9 @@ export default defineComponent({
       personSharp,
       calculatorOutline,
       calculatorSharp,
+      logOutOutline,
+      logOutSharp,
+      logOut,
       router,
     };
   },

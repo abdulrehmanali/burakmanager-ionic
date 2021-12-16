@@ -21,12 +21,13 @@ export const get = async (id: any)=>{
     } 
   });
 }
-export const create = async (name: string, address: string, invitations: Array<any>)=>{
+export const create = async (name: string, address: string,currency: string, invitations: Array<any>)=>{
   store.create();
   const token = await store.get('token');
   return axios.post(baseUrl+'shops',{
       name,
       address,
+      currency,
       invitations
   },{
     headers: {
@@ -34,12 +35,13 @@ export const create = async (name: string, address: string, invitations: Array<a
     },
   });
 }
-export const update = async (id: string, name: string, address: string, users: Array<any>, invitations: Array<any>)=>{
+export const update = async (id: string, name: string, address: string, currency: string, users: Array<any>, invitations: Array<any>)=>{
   store.create();
   const token = await store.get('token');
   return axios.post(baseUrl+'shops/'+id,{
       name,
       address,
+      currency,
       users,
       invitations
   },{

@@ -52,9 +52,14 @@
               <ion-button expand="block" v-on:click="createNewCustomer()" :disabled="disableSave">Create</ion-button>
           </ion-card-content>
         </ion-card>
-        <ion-card>
-          <ion-card-content v-if="errorMsg" class="error-message">
+        <ion-card v-if="errorMsg && (errorMsg instanceof String)">
+          <ion-card-content class="error-message">
             {{ errorMsg }}
+          </ion-card-content>
+        </ion-card>
+        <ion-card v-if="errorMsg && (typeof errorMsg === 'object')">
+          <ion-card-content class="error-message" v-for="msg in errorMsg" :key="msg[0]">
+            {{ msg[0] }}
           </ion-card-content>
         </ion-card>
       </div>
@@ -89,9 +94,15 @@ export default {
         router.push('/customers');
       }).catch(error=>{
         state.disableSave = false;
+        console.log(error.response.data.errors)
         if(!error.response || !error.response.data){
           state.errorMsg = "Error please try again";
           return;
+        }
+        if(error.response.data.errors){
+          state.errorMsg = error.response.data.errors;
+          console.log(state.errorMsg);
+          return
         }
         state.errorMsg = error.response.data.error;
       })

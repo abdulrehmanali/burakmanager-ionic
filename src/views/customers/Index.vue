@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonFab, IonFabButton } from "@ionic/vue";
+import { IonContent, IonPage, IonFab, IonFabButton, onIonViewWillEnter } from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
 import { reactive, toRefs } from "@vue/reactivity";
@@ -58,8 +58,10 @@ export default {
       }).catch(err=>{
         alert("Please Check your internet")
       });
-    }
-    getCustomers();
+    }    
+    onIonViewWillEnter(() => {
+      getCustomers();
+    });
     return { ...toRefs(state), router, add };
   },
   components: {

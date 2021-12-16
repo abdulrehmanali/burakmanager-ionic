@@ -49,7 +49,7 @@ export const getCurrentUser = new Promise((resolve, reject) => {
 const app = createApp(App)
   .use(IonicVue)
   .use(router);
-  
+
 router.isReady().then(() => {
   app.mount('#app');
 });

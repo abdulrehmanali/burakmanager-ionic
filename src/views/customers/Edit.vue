@@ -65,9 +65,14 @@
           </ion-list>
           </ion-card-content>
         </ion-card>
-        <ion-card>
-          <ion-card-content v-if="errorMsg" class="error-message">
+        <ion-card v-if="errorMsg && (errorMsg instanceof String)">
+          <ion-card-content class="error-message">
             {{ errorMsg }}
+          </ion-card-content>
+        </ion-card>
+        <ion-card v-if="errorMsg && (typeof errorMsg === 'object')">
+          <ion-card-content class="error-message" v-for="msg in errorMsg" :key="msg[0]">
+            {{ msg[0] }}
           </ion-card-content>
         </ion-card>
       </div>
@@ -106,8 +111,12 @@ export default {
         state.customer = customer.data.customer;
         state.disableSave = false;
       } catch (error) {
-        state.errorMsg = error.message;
         state.disableSave = false;
+        if(error.response.data.errors){
+          state.errorMsg = error.response.data.errors;
+          return
+        }
+        state.errorMsg = error.message;
       }
     };
 
@@ -118,8 +127,12 @@ export default {
         router.back();
         state.disableSave = false;
       } catch (error) {
-        state.errorMsg = error.message;
         state.disableSave = false;
+        if(error.response.data.errors){
+          state.errorMsg = error.response.data.errors;
+          return
+        }
+        state.errorMsg = error.message;
       }
     };
     getCustomerFromServer(id.toString());
