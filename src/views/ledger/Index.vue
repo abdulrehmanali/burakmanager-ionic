@@ -10,23 +10,33 @@
     </ion-header>
     <ion-content :fullscreen="true">
       <ion-spinner v-if="loading" class="loader" />
-      <ion-note v-if="!loading" class="ion-text-center status-text">{{entries.length}} Entries Found</ion-note>
+      <ion-note v-if="!loading" class="ion-text-center status-text"
+        >{{ entries.length }} Entries Found</ion-note
+      >
       <ion-list v-if="entries.length">
         <ion-item
-          v-for="(entry) in entries"
+          v-for="entry in entries"
           :key="entry.id"
           :value="entry.id"
           v-on:click="openPdf(entry.id)"
         >
           <ion-label class="ion-text-capitalize">
-            <h2>{{ entry.customer.name }}</h2>
-            <p>{{ entry.customer.email }}</p>
-            <span class="badge green-badge">{{ entry.payment_method }}</span>
-            <span class="badge blue-badge">{{ entry.payment_status }}</span>
+            <h1>{{ (entry.customer_name?entry.customer_name:'N/A') }}</h1>
+            <span class="badge blue-badge">{{ entry.payment_method }}</span>
+            <span :class="'badge '+((entry.payment_status === 'received')?'green-badge':'warning-badge')">{{ entry.payment_status }}</span>
           </ion-label>
           <ion-label class="ion-text-end ion-text-capitalize">
-          <h1>{{ entry.total >= entry.amount_received ? entry.total : entry.amount_received }} {{ entry.type }}</h1>
-          <h2 v-if="entry.total < entry.amount_received">Pending Payment: {{entry.amount_received - entry.total}} </h2>
+            <h1>
+              {{
+                entry.total >= entry.amount_received
+                  ? entry.total
+                  : entry.amount_received
+              }}
+              {{ entry.type }}
+            </h1>
+            <h2 v-if="entry.total < entry.amount_received">
+              Pending Payment: {{ entry.amount_received - entry.total }}
+            </h2>
           </ion-label>
         </ion-item>
       </ion-list>
@@ -42,13 +52,24 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, IonFab, IonFabButton, onIonViewWillEnter, isPlatform } from "@ionic/vue";
+import {
+  IonContent,
+  IonPage,
+  IonFab,
+  IonFabButton,
+  onIonViewWillEnter,
+  isPlatform,
+} from "@ionic/vue";
 import { useRouter } from "vue-router";
 import { add } from "ionicons/icons";
 import { reactive, toRefs } from "@vue/reactivity";
-import { allLedgerEntries, getReciptUrl } from "@/services/ledger.services";
-import { Browser } from '@capacitor/browser';
-import { Share } from '@capacitor/share';
+import {
+  allLedgerEntries,
+  getReciptHtml,
+  getReciptUrl,
+} from "@/services/ledger.services";
+import { Browser } from "@capacitor/browser";
+import { Printer } from "@awesome-cordova-plugins/printer";
 
 export default {
   name: "LedgerIndex",
@@ -56,37 +77,39 @@ export default {
     const router = useRouter();
     const state = reactive({
       entries: [] as any,
-      errorMsg:"",
-      loading: true
+      errorMsg: "",
+      loading: true,
     });
-    const getLedger = ()=>{
-      allLedgerEntries().then(res=>{
-        state.entries = res.data.entries
-        state.loading = false
-      }).catch(err=>{
-        console.log(err);
-      });
-    }
-    const openPdf = async (id: any)=>{
-      try {
-        const url = await getReciptUrl(id);
-        await Share.share({
-          title: ('Recipt #'+id),
-          text:( 'Recipt #'+id),
-          url: url,
-          dialogTitle:( 'Recipt #'+id),
+    const getLedger = () => {
+      allLedgerEntries()
+        .then((res) => {
+          state.entries = res.data.entries;
+          state.loading = false;
+        })
+        .catch((err) => {
+          console.log(err);
         });
-
-        //Browser.open({ url: ('http://docs.google.com/gview?embedded=true&url='+url)});
-      } catch(e) {
-        console.log(e)
+    };
+    const openPdf = async (id: any) => {
+      try {
+        if (isPlatform("cordova")) {
+          const html = await getReciptHtml(id);
+          await Printer.print(html.data, {
+            name: "Recipt #" + id + ".pdf",
+          });
+        } else {
+          const url = await getReciptUrl(id);
+          await Browser.open({ url });
+        }
+      } catch (e) {
         alert(e);
+        console.log(e);
       }
-    }
+    };
     onIonViewWillEnter(() => {
       getLedger();
     });
-    return { ...toRefs(state),openPdf, router, add };
+    return { ...toRefs(state), openPdf, router, add };
   },
   components: {
     IonContent,
@@ -110,13 +133,17 @@ export default {
   background-color: #42d77d;
   color: #ffffff;
 }
+.warning-badge {
+  background-color: #ffc408;
+  color: #000;
+}
 .blue-badge {
-  background-color:#438cff;
+  background-color: #438cff;
   color: #ffffff;
 }
 .status-text {
-  width:100%;
-  display:block;
-  margin:5px 0;
+  width: 100%;
+  display: block;
+  margin: 5px 0;
 }
 </style>

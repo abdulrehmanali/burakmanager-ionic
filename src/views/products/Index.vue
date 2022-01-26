@@ -21,7 +21,7 @@
         >
           <ion-label>
             <h2>{{ product.name }}</h2>
-            <p>{{ (product.batches?product.batches.length:0) }} Batches</p>
+            <p>{{ (product.batches?product.batches.length:0) }} Batche(s), {{ product.batches?(product.batches.map(e=>{return e.quantity;}).reduce((total, num)=>{return total + Math.round(num)})):"" }} Item(s)</p>
           </ion-label>
           <ion-note slot="end">
             <h4>{{product.sku}}</h4>

@@ -1,4 +1,5 @@
 import axios from "axios"
+import { Buffer } from 'buffer';
 const baseUrl = process.env.VUE_APP_API_BASE_URL;
 import { Storage } from '@ionic/storage';
 const store = new Storage();
@@ -54,4 +55,17 @@ export const getReciptUrl = async (id: any)=>{
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
   return baseUrl+'shops/'+selectedShop['id']+'/ledger/'+id+'/recipt';
+}
+export const getReciptBase64 = async (id: any)=>{
+  const url = await getReciptUrl(id);
+  return await axios
+  .get(url, {
+    responseType: 'arraybuffer'
+  })
+  .then(response => new Buffer(response.data, 'binary').toString('base64'))
+}
+export const getReciptHtml = async (id: any)=>{
+  const url = await getReciptUrl(id);
+  return await axios
+  .get(url+'?html=true');
 }

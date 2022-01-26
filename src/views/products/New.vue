@@ -19,6 +19,7 @@
                     <ion-label position="floating">Name*</ion-label>
                     <ion-input
                       v-model="name"
+                      :value="name"
                       @input="name = $event.target.value"
                     ></ion-input>
                   </ion-item>
@@ -69,6 +70,7 @@
                   <ion-input
                     v-model="batch.purchased_at"
                     type="date"
+                    :value="batch.purchased_at"
                     @input="batch.purchased_at = $event.target.value"
                   ></ion-input>
                 </ion-item>
@@ -79,6 +81,7 @@
                   <ion-input
                     v-model="batch.expire_at"
                     type="date"
+                    :value="batch.expire_at"
                     @input="batch.expire_at = $event.target.value"
                   ></ion-input>
                 </ion-item>
@@ -89,6 +92,7 @@
                   <ion-input
                     v-model="batch.purchasing_price"
                     type="number"
+                    :value="batch.purchasing_price"
                     @input="batch.purchasing_price = $event.target.value"
                   ></ion-input>
                 </ion-item>
@@ -98,6 +102,7 @@
                   <ion-label>Selling Price*: </ion-label>
                   <ion-input
                     v-model="batch.selling_price"
+                    :value="batch.selling_price"
                     @input="batch.selling_price = $event.target.value"
                   ></ion-input>
                 </ion-item>
@@ -107,6 +112,7 @@
                   <ion-label>Quantity*: </ion-label>
                   <ion-input
                     v-model="batch.quantity"
+                    :value="batch.quantity"
                     @input="batch.quantity = $event.target.value"
                   ></ion-input>
                 </ion-item>
@@ -180,9 +186,14 @@
           :disabled="disableCreateButton"
           >Save</ion-button
         >
-        <ion-card>
-          <ion-card-content v-if="errorMsg" class="error-message">
+        <ion-card v-if="errorMsg && (errorMsg instanceof String)">
+          <ion-card-content class="error-message">
             {{ errorMsg }}
+          </ion-card-content>
+        </ion-card>
+        <ion-card v-if="errorMsg && (typeof errorMsg === 'object')">
+          <ion-card-content class="error-message" v-for="msg in errorMsg" :key="msg[0]">
+            {{ msg[0] }}
           </ion-card-content>
         </ion-card>
       </div>
@@ -218,7 +229,7 @@ export default {
     IonSelect,
   },
   setup() {
-    const state = reactive({
+    const stateDefault = {
       name: "",
       sku: "",
       errorMsg: "",
@@ -228,6 +239,7 @@ export default {
       availableMeasurementUnits: [
         { key: "centigram", name: "Centigram (cg)" },
         { key: "centilitre", name: "Centilitre (cL)" },
+        { key: "carton", name: "Carton" },
         { key: "decagram", name: "Decagram (dag)" },
         { key: "decalitre", name: "Decalitre (daL)" },
         { key: "decigram", name: "Decigram (dg)" },
@@ -242,10 +254,12 @@ export default {
         { key: "milligram", name: "Milligram (mg)" },
         { key: "millilitre", name: "Millilitre (mL)" },
         { key: "piece", name: "Piece(s)" },
-        { key: "tonne", name: "Tonne (t)" },
         { key: "packet", name: "Packet" },
+        { key: "tonne", name: "Tonne (t)" },
+        { key: "ounce", name: "Ounce (OZ)" },
       ],
-    });
+    }
+    const state = reactive({...stateDefault});
     const checkPermission = () => {
       return new Promise((resolve, reject) => {
         BarcodeScanner.checkPermission({ force: true }).then(status=>{
@@ -286,6 +300,12 @@ export default {
     };
 
     onIonViewWillLeave(() => {
+      state.name = ''
+      state.sku = ''
+      state.errorMsg = ''
+      state.batches = [] as any
+      state.disableCreateButton = false
+      state.scanActive = false
       stopScanner();
     });
     const openScanner = async () => {
@@ -330,26 +350,24 @@ export default {
       }
       createProduct(state.name, state.sku, state.batches)
         .then((res: any) => {
+          state.disableCreateButton = false;
           if (res.data.error) {
             state.errorMsg = res.response.data.error;
             return;
           }
-          state.disableCreateButton = false;
           router.push("/products");
         })
         .catch((res: any) => {
           state.disableCreateButton = false;
-          if (!res.response.data.error || !res.response.data.errors) {
-            state.errorMsg =
-              "Error Please check your internet conneciton and try again";
+          if(!res.response || !res.response.data){
+            state.errorMsg = "Error please try again";
             return;
           }
-          if (res.response.data.error) {
-            state.errorMsg = res.response.data.error;
-          }
-          if (res.response.data.errors) {
+          if(res.response.data.errors){
             state.errorMsg = res.response.data.errors;
+            return
           }
+          state.errorMsg = res.response.data.error;
         });
     };
     const onSkuInput = (sku: any) => {

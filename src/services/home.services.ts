@@ -13,10 +13,9 @@ export const getHome = async ()=>{
       'Authorization': token
     }
   };
-  if(selectedShop){ 
-    args.params = {
-      'shop_id':selectedShop['id']
-    }
+  let url = baseUrl+'home/';
+  if(selectedShop && selectedShop.id){
+    url += selectedShop.id
   }
-  return axios.get(baseUrl+'home/',args);
+  return axios.get(url,args);
 }

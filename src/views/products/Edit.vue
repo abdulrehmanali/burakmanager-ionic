@@ -159,6 +159,35 @@
             {{ errorMsg }}
           </ion-card-content>
         </ion-card>
+        <ion-card v-if="productionProducts">
+          <ion-card-header>
+            <ion-card-title style="margin: 10px 0px">Ingredients</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list>
+              <ion-item
+                v-for="(product) in productionProducts.products"
+                :key="product.sku"
+                :value="product.sku"
+              >
+                <ion-grid>
+                  <ion-row class="products-row">
+                    <ion-col>
+                      <ion-label>{{ product.name }}</ion-label>
+                      <p>
+                        {{ product.quantity }}
+                        {{ product.measurement_unit }} available
+                      </p>
+                    </ion-col>
+                    <ion-col>
+                      <ion-label>{{ product.one_product_quantity }} {{ product.measurement_unit }}</ion-label>
+                    </ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
       </div>
     </ion-content>
   </ion-page>
@@ -183,34 +212,38 @@ export default {
   setup() {
     const route = useRoute();
     const { sku } = route.params;
-    
-    const state = reactive({
+    const stateDefault = {
       product: {
         id: "",
         sku:""
       } as any,
       errorMsg: "",
       disableSaveButton:true,
+      productionProducts: [] as any,
       availableMeasurementUnits:[
-        {'key':'centigram','name':"Centigram (cg)"},
-        {'key':'centilitre','name':"Centilitre (cL)"},
-        {'key':'decagram','name':"Decagram (dag)"},
-        {'key':'decalitre','name':"Decalitre (daL)"},
-        {'key':'decigram','name':"Decigram (dg)"},
-        {'key':'decilitre','name':"Decilitre (dL)"},
-        {'key':'gram','name':"Gram (g)"},
-        {'key':'hectogram','name':"Hectogram (hg)"},
-        {'key':'hectolitre','name':"Hectolitre (hL)"},
-        {'key':'kilo','name':"Kilo (k)"},
-        {'key':'kilogram','name':"Kilogram (kg)"},
-        {'key':'kilolitre','name':"Kilolitre (kL)"},
-        {'key':'litre','name':"Litre (L)"},
-        {'key':'milligram','name':"Milligram (mg)"},
-        {'key':'millilitre','name':"Millilitre (mL)"},
-        {'key':'piece','name':"Piece(s)"},
-        {'key':'tonne','name':"Tonne (t)"}
+        { key: "centigram", name: "Centigram (cg)" },
+        { key: "centilitre", name: "Centilitre (cL)" },
+        { key: "carton", name: "Carton" },
+        { key: "decagram", name: "Decagram (dag)" },
+        { key: "decalitre", name: "Decalitre (daL)" },
+        { key: "decigram", name: "Decigram (dg)" },
+        { key: "decilitre", name: "Decilitre (dL)" },
+        { key: "gram", name: "Gram (g)" },
+        { key: "hectogram", name: "Hectogram (hg)" },
+        { key: "hectolitre", name: "Hectolitre (hL)" },
+        { key: "kilo", name: "Kilo (k)" },
+        { key: "kilogram", name: "Kilogram (kg)" },
+        { key: "kilolitre", name: "Kilolitre (kL)" },
+        { key: "litre", name: "Litre (L)" },
+        { key: "milligram", name: "Milligram (mg)" },
+        { key: "millilitre", name: "Millilitre (mL)" },
+        { key: "piece", name: "Piece(s)" },
+        { key: "packet", name: "Packet" },
+        { key: "tonne", name: "Tonne (t)" },
+        { key: "ounce", name: "Ounce (OZ)" },
       ]
-    });
+    }
+    const state = reactive({...stateDefault});
     const openScanner = async () => {
       QRScanner.prepare()
         .then((status: QRScannerStatus) => {
@@ -239,6 +272,7 @@ export default {
       try {
         const product = await getProduct(sku)
         state.product = product.data.product;
+        state.productionProducts = product.data.productionProducts;
         state.disableSaveButton = false;
       } catch (error) {
         state.errorMsg = error.message;

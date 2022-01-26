@@ -3,7 +3,9 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button
+            default-href="/production-products"
+          ></ion-back-button>
         </ion-buttons>
         <ion-title>New Production Product</ion-title>
       </ion-toolbar>
@@ -19,7 +21,9 @@
                 >
               </ion-col>
               <ion-col>
-                <ion-button @click="openSelectProductModal" class="ion-float-end"
+                <ion-button
+                  @click="openSelectProductModal"
+                  class="ion-float-end"
                   >Select Product</ion-button
                 >
               </ion-col>
@@ -33,9 +37,7 @@
             >
               <ion-label>
                 <h2>{{ product.name }}</h2>
-                <p>
-                  {{ product.quantity }} {{ product.measurement_unit }}
-                </p>
+                <p>{{ product.quantity }} {{ product.measurement_unit }}</p>
               </ion-label>
               <ion-icon
                 slot="end"
@@ -47,11 +49,14 @@
         </ion-card>
         <ion-card v-if="selectedProducts.length">
           <ion-card-header>
-            <ion-card-title>Products Quantity Required in Production</ion-card-title>
+            <ion-card-title
+              >Products Quantity Required in Production</ion-card-title
+            >
           </ion-card-header>
           <ion-card-content>
             <ion-note
-              >Please select the quantity required to generate one product</ion-note
+              >Please select the quantity required to generate one
+              product</ion-note
             >
             <ion-list>
               <ion-item>
@@ -90,7 +95,9 @@
                           placeholder="Quantity"
                           :max="selectedProducts[key].quantity"
                           min="0"
-                          @keyup="forOnePieceQuantityUpdate(key, $event.target.value)"
+                          @keyup="
+                            forOnePieceQuantityUpdate(key, $event.target.value)
+                          "
                         ></ion-input>
                       </ion-item>
                     </ion-col>
@@ -173,23 +180,47 @@
             <ion-list>
               <ion-item>
                 <ion-label>Name</ion-label>
-                <ion-input type="text" placeholder="Name of product"></ion-input>
+                <ion-input
+                  type="text"
+                  placeholder="Name of product"
+                  v-on:change="
+                    (e) => {
+                      newProductName = e.target.value;
+                    }
+                  "
+                ></ion-input>
               </ion-item>
               <ion-item>
                 <ion-label>Price</ion-label>
-                <ion-input type="text" placeholder="Price of one product"></ion-input>
+                <ion-input
+                  type="text"
+                  placeholder="Price of one product"
+                  v-on:change="
+                    (e) => {
+                      newProductPrice = e.target.value;
+                    }
+                  "
+                ></ion-input>
               </ion-item>
               <ion-item>
                 <ion-label>SKU</ion-label>
-                <ion-input type="text" placeholder="SKU"></ion-input>
+                <ion-input
+                  type="text"
+                  placeholder="SKU"
+                  v-on:change="
+                    (e) => {
+                      newProductSku = e.target.value;
+                    }
+                  "
+                ></ion-input>
               </ion-item>
             </ion-list>
             <ion-button v-on:click="crateNewProductionCapicity()">
               Save
             </ion-button>
             <p v-if="errorMsg" class="error-message">
-            {{ errorMsg }}
-          </p>
+              {{ errorMsg }}
+            </p>
           </ion-card-content>
         </ion-card>
       </div>
@@ -203,8 +234,8 @@ import { reactive, toRefs } from "@vue/reactivity";
 import SelectProductModelVue from "../components/models/SelectProductModel.vue";
 import { emitter } from "@/services/emitter";
 import { trash } from "ionicons/icons";
-import { Storage } from '@ionic/storage';
-import { db } from '@/main';
+import { createProductionProduct } from "@/services/productionProducts.services";
+import router from "@/router";
 
 let selectProductModelVue: any;
 export default {
@@ -214,28 +245,25 @@ export default {
     IonPage,
   },
   setup() {
-    const store = new Storage();
     const state = reactive({
       selectedProducts: [] as any,
       maxProducibleProducts: 0 as any,
       lastCalculatedAt: 0,
       customQuantity: 0,
-      newProductName:"",
-      newProductPrice:0,
-      newProductSku:0,
-      errorMsg: ""
+      newProductName: "",
+      newProductPrice: 0,
+      newProductSku: 0,
+      errorMsg: "",
     });
     emitter.on("select_product_event", async (ob: any) => {
-      console.log(ob)
       state.selectedProducts.push({
+        'product_id': ob.id,
         name: ob.name,
         sku: ob.sku,
         'selling_price': ob.batches[ob.batchId].selling_price,
         'purchasing_price': ob.batches[ob.batchId].purchasing_price,
         'measurement_unit': ob.batches[ob.batchId].measurement_unit,
         quantity: ob.batches[ob.batchId].quantity,
-        'created_at': ob.created_at,
-        'updated_at': ob.updated_at
       });
       await selectProductModelVue.dismiss();
     });
@@ -261,18 +289,19 @@ export default {
       for (let i = 0; i < state.selectedProducts.length; i++) {
         const selectedProduct = state.selectedProducts[i];
         maxQuantity.push(
-          selectedProduct.quantity / selectedProduct.quantityRequiredForOneProduct
+          selectedProduct.quantity / selectedProduct["one_product_quantity"]
         );
       }
       state.maxProducibleProducts = Math.round(Math.min(...maxQuantity));
     };
     const forOnePieceQuantityUpdate = (key: number, quantity: any) => {
-      state.selectedProducts[key].quantityRequiredForOneProduct = quantity;
+      state.selectedProducts[key]["one_product_quantity"] = quantity;
       calculateProducts();
     };
     const calculateAdditionalRequired = (product: any) => {
       let additionalRequired = 0;
-      const customQuantity = state.customQuantity * product.quantityRequiredForOneProduct;
+      const customQuantity =
+        state.customQuantity * product["one_product_quantity"];
       if (customQuantity > product.quantity) {
         additionalRequired = customQuantity - product.quantity;
       }
@@ -280,31 +309,23 @@ export default {
     };
     const crateNewProductionCapicity = async () => {
       try {
-        if(state.selectedProducts.length == 0 || !state.newProductName || !state.newProductPrice || !state.newProductSku) {
-          state.errorMsg = 'Please make sure you have selected. And You have enter Prodduct Name, SKU and Price';
+        if (
+          state.selectedProducts.length == 0 ||
+          !state.newProductName ||
+          !state.newProductPrice ||
+          !state.newProductSku
+        ) {
+          state.errorMsg =
+            "Please make sure you have selected. And You have enter Prodduct Name, SKU and Price";
           return;
         }
-        await store.create();
-        const selectedShop = await store.get('selectedShop');
-        if(!selectedShop){
-          new Error('No Shop Seleted.');
-          return;
-        }
-        await db
-          .collection("shops")
-          .doc(selectedShop)
-          .collection("productionCapicity")
-          .add({
-            createdAt: new Date().getTime(),
-            lastUpdatedAt: new Date().getTime(),
-            selectedProducts: state.selectedProducts,
-            maxProducibleProducts: state.maxProducibleProducts,
-            lastCalculatedAt: state.lastCalculatedAt,
-            customQuantity: state.customQuantity,
-            newProductName: state.newProductName,
-            newProductPrice: state.newProductPrice,
-            newProductSku: state.newProductSku,
-          });
+        await createProductionProduct(
+          state.newProductName,
+          state.newProductPrice.toString(),
+          state.newProductSku.toString(),
+          state.selectedProducts
+        );
+        router.push("/production-products");
       } catch (error) {
         state.errorMsg = error.message;
       }
@@ -312,12 +333,12 @@ export default {
     return {
       ...toRefs(state),
       openSelectProductModal,
-      trash,  
+      trash,
       deleteSelectedProduct,
       calculateProducts,
       forOnePieceQuantityUpdate,
       calculateAdditionalRequired,
-      crateNewProductionCapicity
+      crateNewProductionCapicity,
     };
   },
 };

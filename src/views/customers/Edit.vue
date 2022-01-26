@@ -30,9 +30,9 @@
                     <ion-item>
                       <ion-label position="floating">Contact Number</ion-label>
                       <ion-input
-                        v-model="customer.contactNumber"
-                        :value="customer.contactNumber"
-                        @input="customer.contactNumber = $event.target.value"
+                        v-model="customer.phone_number"
+                        :value="customer.phone_number"
+                        @input="customer.phone_number = $event.target.value"
                       ></ion-input>
                     </ion-item>
                   </ion-col>
@@ -49,11 +49,50 @@
                     </ion-item>
                   </ion-col>
                 </ion-row>
+                 <ion-row>
+                  <ion-col>
+                    <ion-item>
+                      <ion-label position="floating">Address</ion-label>
+                      <ion-textarea
+                        v-model="customer.address"
+                        type="text"
+                        :value="customer.address"
+                        @input="customer.address = $event.target.value"
+                      ></ion-textarea>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>
+                    <ion-item>
+                      <ion-label position="floating">NTN</ion-label>
+                      <ion-input
+                        v-model="customer.ntn"
+                        type="text"
+                        :value="customer.ntn"
+                        @input="customer.ntn = $event.target.value"
+                      ></ion-input>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col>
+                    <ion-item>
+                      <ion-label position="floating">Company Name</ion-label>
+                      <ion-input
+                        v-model="customer.company_name"
+                        type="text"
+                        :value="customer.company_name"
+                        @input="customer.company_name = $event.target.value"
+                      ></ion-input>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
               </ion-grid>
               <ion-button expand="block" type="submit" :disabled="disableSave" @click="saveCustomer()">Save</ion-button>
           </ion-card-content>
         </ion-card>
-        <ion-card>
+        <!-- <ion-card>
           <ion-card-header>
             <ion-card-title>User Orders</ion-card-title>
           </ion-card-header>
@@ -64,7 +103,7 @@
             </ion-item>
           </ion-list>
           </ion-card-content>
-        </ion-card>
+        </ion-card> -->
         <ion-card v-if="errorMsg && (errorMsg instanceof String)">
           <ion-card-content class="error-message">
             {{ errorMsg }}
@@ -109,6 +148,7 @@ export default {
         state.disableSave = true;
         const customer = await getCustomer(id) as any;
         state.customer = customer.data.customer;
+        console.log(customer.data.customer)
         state.disableSave = false;
       } catch (error) {
         state.disableSave = false;
@@ -123,7 +163,7 @@ export default {
     const saveCustomer = async () => {
       try {
         state.disableSave = true;
-        updateCustomer(state.id, state.customer.name, state.customer.email, state.customer.phoneNumber)
+        updateCustomer(state.id, state.customer.name, state.customer.email, state.customer.phone_number, state.customer.address, state.customer.ntn, state.customer.company_name)
         router.back();
         state.disableSave = false;
       } catch (error) {

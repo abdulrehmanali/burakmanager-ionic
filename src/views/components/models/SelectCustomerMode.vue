@@ -37,7 +37,7 @@ export default defineComponent({
       loading: true,
       customers: [],
     });
-    const getShops = () =>{
+    const getCustomers = () =>{
       allCustomers().then(async(res)=>{
           state.customers = res.data.customers;
           state.loading = false
@@ -45,7 +45,7 @@ export default defineComponent({
         alert("Please Check your internet")
       });
     }
-    getShops();
+    getCustomers();
     const onCustomerClick = (customer) => {
       emitter.emit('select_customer_event',JSON.parse(JSON.stringify(customer)))
     }

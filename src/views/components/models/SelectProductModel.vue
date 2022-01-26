@@ -26,7 +26,7 @@
             </ion-col>
           </ion-row>
           <ion-row  v-for="(batch,k) in product.batches" :key="k" class="product-batches" v-on:click="onProductClick(product,k)">
-            <ion-col size="12">
+            <ion-col size="12" v-if="batch.quantity > 0">
               <b>Selling Price: {{ batch.selling_price }}</b>
               <p>{{ batch.quantity }} {{ batch.measurement_unit }} in stock</p>
             </ion-col>
@@ -117,12 +117,14 @@ export default defineComponent({
 .product-row {
   padding:6px 0;
 }
-.product-batches {
-  padding:6px;
-  background-color: #121212;
+@media (prefers-color-scheme: dark) {
+  .product-batches {
+    padding:6px;
+    background-color: #121212;
+  }
 }
 
-.product-batches p{
+.product-batches p {
   margin:0;
 }
 

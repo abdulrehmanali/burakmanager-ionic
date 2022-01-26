@@ -9,7 +9,7 @@
         <ion-content>
           <ion-list id="inbox-list">
             <ion-list-header>{{ user.name }}</ion-list-header>
-            <ion-note>{{ selectedShop.name}}</ion-note>
+            <ion-note>{{ selectedShop.name }}</ion-note>
 
             <ion-menu-toggle
               auto-hide="false"
@@ -32,7 +32,10 @@
                 <ion-label>{{ p.title }}</ion-label>
               </ion-item>
             </ion-menu-toggle>
-            <ion-item v-on:click='logOut()'>
+            <ion-item v-on:click='logOut()'
+                lines="none"
+                detail="false"
+                class="hydrated">
               <ion-icon
                   slot="start"
                   :ios="logOutSharp"
@@ -44,7 +47,7 @@
           <ion-item>
             <ion-label>Selected Shop</ion-label>
             <ion-select
-              placeholder="Select One"
+              :placeholder="(selectedShop.name?selectedShop.name:'Select One')"
               @ionChange="selectShop($event.target.value)"
               multiple="false"
               :value="selectedShop.id"
@@ -152,12 +155,12 @@ export default defineComponent({
       },
       {
         title: "Production Products",
-        url: "/production-products/new",
+        url: "/production-products",
         iosIcon: calculatorOutline,
         mdIcon: calculatorSharp,
       },
       {
-        title: "Customers",
+        title: "Customers / Sellers",
         url: "/customers",
         iosIcon: personOutline,
         mdIcon: personSharp,
