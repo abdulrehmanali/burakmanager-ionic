@@ -27,15 +27,14 @@
           </ion-label>
           <ion-label class="ion-text-end ion-text-capitalize">
             <h1>
-              {{
-                entry.total >= entry.amount_received
-                  ? entry.total
-                  : entry.amount_received
-              }}
+              {{ entry.total }}
               {{ entry.type }}
             </h1>
-            <h2 v-if="entry.total < entry.amount_received">
+            <h2 v-if="entry.total > entry.amount_received">
               Pending Payment: {{ entry.amount_received - entry.total }}
+            </h2>
+            <h2 v-if="entry.total < entry.amount_received">
+              Additional Amount: {{ entry.total - entry.amount_received}}
             </h2>
           </ion-label>
         </ion-item>

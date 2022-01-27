@@ -17,11 +17,11 @@
                 <ion-card-title>{{ shop.shop.name }}</ion-card-title>
                 <ion-card-subtitle>{{ shop.shop.address }}</ion-card-subtitle>
               </ion-col>
-              <ion-col>
+              <!-- <ion-col>
                 <ion-button @click="router.push('/shops/'+shop.shop.id)" v-if="shop.shop.admin_id == user.id" class="ion-float-end"
                   >Edit</ion-button
                 >
-              </ion-col>
+              </ion-col> -->
             </ion-row>
         </ion-card-header>
       </ion-card>

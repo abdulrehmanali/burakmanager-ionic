@@ -3,9 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button
-            default-href="/production-products"
-          ></ion-back-button>
+          <ion-back-button defaultHref="/production-products" />
         </ion-buttons>
         <ion-title>New Production Product</ion-title>
       </ion-toolbar>
@@ -229,7 +227,7 @@
 </template>
 
 <script lang="ts">
-import { IonContent, IonPage, modalController } from "@ionic/vue";
+import { IonContent, IonPage, modalController, IonBackButton } from "@ionic/vue";
 import { reactive, toRefs } from "@vue/reactivity";
 import SelectProductModelVue from "../components/models/SelectProductModel.vue";
 import { emitter } from "@/services/emitter";
@@ -243,6 +241,7 @@ export default {
   components: {
     IonContent,
     IonPage,
+    IonBackButton
   },
   setup() {
     const state = reactive({
