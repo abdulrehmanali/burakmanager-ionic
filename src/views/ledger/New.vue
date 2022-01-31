@@ -524,7 +524,6 @@ export default {
       }, 200);
     }
     const onProductClick = (product: any,productKey: any, batch: any) => {
-      console.log(batch, batch.id);
       state.selectedProducts[productKey]['batch_id'] = batch.id
       state.selectedProducts[productKey]['product_id'] = product.id
       state.selectedProducts[productKey]['product_name'] = product.name
@@ -543,6 +542,17 @@ export default {
       state.selectedProducts[productKey]['loadingProducts'] = false
     }
     const updateRequiredQuantity = ($event: any, product: any) => {
+      if (productsTimeout != null) {
+        clearTimeout(productsTimeout);
+        productsTimeout = null;
+      }
+      product.searchProducts = []
+      product.loadingProducts = false
+
+      if(product.id == null) {
+          product.quantity  = $event.target.value
+          return;
+      }
       if($event.target.value <= product.stockQuantity){
         product.quantity  = $event.target.value
       } else {

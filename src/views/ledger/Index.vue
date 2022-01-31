@@ -31,10 +31,10 @@
               {{ entry.type }}
             </h1>
             <h2 v-if="entry.total > entry.amount_received">
-              Pending Payment: {{ entry.amount_received - entry.total }}
+              Pending Payment: {{ entry.total - entry.amount_received }}
             </h2>
             <h2 v-if="entry.total < entry.amount_received">
-              Additional Amount: {{ entry.total - entry.amount_received}}
+              Additional Amount: {{ entry.amount_received - entry.total }}
             </h2>
           </ion-label>
         </ion-item>
