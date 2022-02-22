@@ -63,6 +63,17 @@
             <ion-row v-for="(batch, id) in product.batches" :key="id">
               <ion-col size="12" size-sm="6">
                 <ion-item>
+                  <ion-label>Batch Number*: </ion-label>
+                  <ion-input
+                    v-model="batch.batch_id"
+                    type="text"
+                    :value="batch.batch_id"
+                    @input="batch.batch_id = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-sm="6">
+                <ion-item>
                   <ion-label>Purchase Date*: </ion-label>
                   <ion-input
                     v-model="batch.purchased_at"
@@ -322,6 +333,7 @@ export default {
     }
     const addBatch = ()=>{
       state.product.batches.push({
+        'batch_id': state.product.batches.length,
         'purchased_at':"",
         'purchasing_price': 0,
         quantity: 0,
