@@ -14,30 +14,32 @@
         >{{ entries.length }} Entries Found</ion-note
       >
       <ion-list v-if="entries.length">
-        <ion-item
-          v-for="entry in entries"
-          :key="entry.id"
-          :value="entry.id"
-          v-on:click="openPdf(entry.id)"
-        >
-          <ion-label class="ion-text-capitalize">
-            <h1>{{ (entry.customer_name?entry.customer_name:'N/A') }}</h1>
-            <span class="badge blue-badge">{{ entry.payment_method }}</span>
-            <span :class="'badge '+((entry.payment_status === 'received')?'green-badge':'warning-badge')">{{ entry.payment_status }}</span>
-          </ion-label>
-          <ion-label class="ion-text-end ion-text-capitalize">
-            <h1>
-              {{ entry.total }}
-              {{ entry.type }}
-            </h1>
-            <h2 v-if="entry.total > entry.amount_received">
-              Pending Payment: {{ entry.total - entry.amount_received }}
-            </h2>
-            <h2 v-if="entry.total < entry.amount_received">
-              Additional Amount: {{ entry.amount_received - entry.total }}
-            </h2>
-          </ion-label>
-        </ion-item>
+        <router-link 
+        v-for="entry in entries"
+        :key="entry.id"
+        :value="entry.id"
+        :to="'/ledger/'+entry.id"
+        class="no-underline">
+          <ion-item>
+            <ion-label class="ion-text-capitalize">
+              <h1>{{ (entry.customer_name?entry.customer_name:'N/A') }}</h1>
+              <span class="badge blue-badge">{{ entry.payment_method }}</span>
+              <span :class="'badge '+((entry.payment_status === 'received')?'green-badge':'warning-badge')">{{ entry.payment_status }}</span>
+            </ion-label>
+            <ion-label class="ion-text-end ion-text-capitalize">
+              <h1>
+                {{ entry.total }}
+                {{ entry.type }}
+              </h1>
+              <h2 v-if="entry.total > entry.amount_received">
+                Pending Payment: {{ entry.total - entry.amount_received }}
+              </h2>
+              <h2 v-if="entry.total < entry.amount_received">
+                Additional Amount: {{ entry.amount_received - entry.total }}
+              </h2>
+            </ion-label>
+          </ion-item>
+        </router-link>
       </ion-list>
       <ion-fab vertical="bottom" horizontal="end" slot="fixed">
         <router-link to="/ledger/new">
@@ -144,5 +146,8 @@ export default {
   width: 100%;
   display: block;
   margin: 5px 0;
+}
+.no-underline {
+  text-decoration: none;
 }
 </style>

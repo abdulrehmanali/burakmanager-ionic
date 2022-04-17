@@ -89,6 +89,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import ('../views/ledger/New.vue'),
     meta:{haveSideBar:true,requiresAuth:true}
   },
+    {
+    path: '/ledger/:id',
+    component: () => import ('../views/ledger/Edit.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
 ]
 
 const router = createRouter({

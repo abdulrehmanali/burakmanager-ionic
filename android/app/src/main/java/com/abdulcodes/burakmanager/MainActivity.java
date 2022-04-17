@@ -1,4 +1,4 @@
-package com.asittech.burakmanager;
+package com.abdulcodes.burakmanager;
 
 import com.getcapacitor.BridgeActivity;
 
