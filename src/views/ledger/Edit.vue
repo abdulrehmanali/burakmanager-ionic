@@ -368,6 +368,7 @@
         <ion-card>
           <ion-card-content>
             <ion-button @click="crateNewEntry">Save</ion-button>
+            <ion-button @click="deleteEntry" class="ion-float-end" color="danger">Delete</ion-button>
           </ion-card-content>
         </ion-card>
       </div>
@@ -388,7 +389,7 @@ import {
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
 import { trash, pencil, arrowDown, arrowUp } from "ionicons/icons";
-import { createLedgerEntry, getLedgerEntry, updateLedgerEntry } from "@/services/ledger.services";
+import { deleteLedgerEntry, getLedgerEntry, updateLedgerEntry } from "@/services/ledger.services";
 import { allCustomers } from "@/services/customers.services";
 import { allProducts } from "@/services/products.services";
 import { useRoute } from 'vue-router';
@@ -455,6 +456,17 @@ export default {
     onIonViewWillEnter(()=>{
       getEntry();
     })
+    const deleteEntry = ()=>{
+      deleteLedgerEntry(String(id)).then(()=>{
+        router.back();
+      }).catch(err=>{
+        if(err.response.data.errors) {
+          state.errorMsg = err.response.data.errors;
+          return;
+        }
+        state.errorMsg = 'Error Please try again';
+      });
+  }
     const crateNewEntry = () => {
         updateLedgerEntry(String(id),
         {
@@ -641,7 +653,8 @@ export default {
       onProductClick,
       arrowDown,
       arrowUp,
-      updateRequiredQuantity
+      updateRequiredQuantity,
+      deleteEntry
     };
   },
 };

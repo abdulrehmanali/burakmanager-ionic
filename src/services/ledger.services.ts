@@ -26,6 +26,17 @@ export const getLedgerEntry = async (id: any)=>{
     } 
   });
 }
+export const deleteLedgerEntry = async (id: any)=>{
+  store.create();
+  const token = await store.get('token');
+  let selectedShop = await store.get('selectedShop');
+  selectedShop = JSON.parse(selectedShop);
+  return axios.delete(baseUrl+'shops/'+(selectedShop['id'])+'/ledger/'+id,{
+    headers: {
+      'Authorization': token
+    } 
+  });
+}
 export const createLedgerEntry = async (entry: any)=>{
   store.create();
   const token = await store.get('token');
