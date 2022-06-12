@@ -31,6 +31,20 @@
           </ion-card-content>
         </ion-card>
         <ion-card>
+          <ion-card-content>
+            <ion-item lines="none">
+              <ion-label>Date</ion-label>
+              <ion-input
+                v-model="createdAt"
+                :value="createdAt"
+                @keyup="createdAt = $event.target.value"
+                type="Date"
+                placeholder="Date"
+              ></ion-input>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+        <ion-card>
           <ion-card-header>
             <ion-row class="ion-align-items-start">
               <ion-col>
@@ -178,7 +192,7 @@
         <ion-card>
           <ion-card-content>
               <ion-item lines="none">
-                <ion-label position="floating">Customer / Seller: </ion-label>
+                <ion-label position="floating">{{type == 'credit' ? 'Customer':'Seller'}}: </ion-label>
                 <ion-input v-model="customer.name" @keyup="getCustomers($event.target.value)" :value="customer.name"></ion-input>
                 <ion-spinner v-if="loadingCustomers"></ion-spinner>
               </ion-item>
@@ -281,7 +295,7 @@
         <ion-card>
           <ion-card-content>
               <ion-item lines="none">
-                <ion-label>Recived Amount: </ion-label>
+                <ion-label>{{type == 'credit' ? 'Recived':'Send'}} Amount: </ion-label>
                 <ion-input
                   type="number"
                   @keyup="recivedAmmountUpdate($event)"
@@ -305,9 +319,9 @@
                   cancel-text="Dismiss"
                 >
                   <ion-select-option
-                    value="received"
-                    :selected="paymentStatus == 'received'"
-                    >Received</ion-select-option
+                    :value="((type == 'credit')?'received':'sended')"
+                    :selected="paymentStatus == ((type == 'credit')?'received':'sended')"
+                    >{{ ((type == 'credit')?'Received':'Sended') }}</ion-select-option
                   >
                   <ion-select-option
                     value="pending"
@@ -390,6 +404,7 @@ export default {
   setup() {
     const state = reactive({
       errorMsg: "",
+      createdAt: new Date().toISOString().split('T')[0],
       type: "credit",
       selectedProducts: [] as any,
       customer: {} as any,
@@ -423,6 +438,7 @@ export default {
           total: state.total,
           'amount_received': state.amountReceived,
           'payment_status': state.paymentStatus,
+          'created_at': state.createdAt,
           note: state.note,
         }).then(()=>{
           router.back();
@@ -497,7 +513,7 @@ export default {
     }
     const recivedAmmountUpdate = (e: any) => {
       if (e.target.value >= state.total) {
-        state.paymentStatus = 'received'
+        state.paymentStatus = ((state.type == 'credit')?'received':'sended')
       } else {
         state.amountReceived = e.target.value;
         state.paymentStatus = 'pending';

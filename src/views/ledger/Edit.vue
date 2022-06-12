@@ -31,6 +31,20 @@
           </ion-card-content>
         </ion-card>
         <ion-card>
+          <ion-card-content>
+            <ion-item lines="none">
+              <ion-label>Date</ion-label>
+              <ion-input
+                v-model="createdAt"
+                :value="createdAt"
+                @keyup="createdAt = $event.target.value"
+                type="Date"
+                placeholder="Date"
+              ></ion-input>
+            </ion-item>
+          </ion-card-content>
+        </ion-card>
+        <ion-card>
           <ion-card-header>
             <ion-row class="ion-align-items-start">
               <ion-col>
@@ -304,9 +318,9 @@
                   cancel-text="Dismiss"
                 >
                   <ion-select-option
-                    value="received"
-                    :selected="paymentStatus == 'received'"
-                    >Received</ion-select-option
+                    :value="((type == 'credit')?'received':'sended')"
+                    :selected="paymentStatus == ((type == 'credit')?'received':'sended')"
+                    >{{ ((type == 'credit')?'Received':'Sended') }}</ion-select-option
                   >
                   <ion-select-option
                     value="pending"
@@ -394,6 +408,7 @@ export default {
     const state = reactive({
       errorMsg: "",
       type: "credit",
+      createdAt: "",
       selectedProducts: [] as any,
       customer: {} as any,
       customers: [] as any,
@@ -455,6 +470,7 @@ export default {
           'amount_received': state.amountReceived,
           'payment_status': state.paymentStatus,
           note: state.note,
+          'created_at': state.createdAt,
         }).then(()=>{
           router.back();
         }).catch(err=>{
@@ -527,7 +543,7 @@ export default {
     }
     const recivedAmmountUpdate = (e: any) => {
       if (e.target.value >= state.total) {
-        state.paymentStatus = 'received'
+        state.paymentStatus = ((state.type == 'credit')?'received':'sended')
       } else {
         state.amountReceived = e.target.value;
         state.paymentStatus = 'pending';
