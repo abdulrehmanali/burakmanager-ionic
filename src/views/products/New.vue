@@ -63,18 +63,7 @@
             </ion-row>
           </ion-card-header>
           <ion-card-content>
-            <ion-row v-for="(batch, id) in batches" :key="id">
-              <ion-col size="12" size-sm="6">
-                <ion-item>
-                  <ion-label>Batch Number*: </ion-label>
-                  <ion-input
-                    v-model="batch.batch_id"
-                    type="text"
-                    :value="batch.batch_id"
-                    @input="batch.batch_id = $event.target.value"
-                  ></ion-input>
-                </ion-item>
-              </ion-col>
+            <ion-row v-for="(batch, id) in batches" :key="id" style="border:1px solid black">
               <ion-col size="12" size-sm="6">
                 <ion-item>
                   <ion-label>Purchase Date*: </ion-label>
@@ -83,6 +72,28 @@
                     type="date"
                     :value="batch.purchased_at"
                     @input="batch.purchased_at = $event.target.value"
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-sm="6">
+                <ion-item>
+                  <ion-label>Purchase From: </ion-label>
+                  <ion-input
+                    type="text"
+                    :value="batch.purchase_from?.company_name"
+                    @click="openSelectProductModel(id)"
+                    readonly
+                  ></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col size="12" size-sm="6">
+                <ion-item>
+                  <ion-label>Delivery Date: </ion-label>
+                  <ion-input
+                    v-model="batch.delivery_at"
+                    type="date"
+                    :value="batch.delivery_at"
+                    @input="batch.delivery_at = $event.target.value"
                   ></ion-input>
                 </ion-item>
               </ion-col>
@@ -154,7 +165,8 @@
                     @change="batch.status = $event.target.value"
                     ok-text="Okay"
                     cancel-text="Dismiss"
-                    value="active"
+                    v-model="batch.status"
+                    :value="batch.status"
                   >
                     <ion-select-option value="active" selected
                       >Active</ion-select-option
@@ -190,14 +202,7 @@
             </ion-row>
           </ion-card-content>
         </ion-card>
-        <ion-button
-          expand="block"
-          type="submit"
-          @click="createNewProduct()"
-          :disabled="disableCreateButton"
-          >Save</ion-button
-        >
-        <ion-card v-if="errorMsg && (errorMsg instanceof String)">
+        <ion-card v-if="errorMsg && (typeof errorMsg === 'string' || errorMsg instanceof String)">
           <ion-card-content class="error-message">
             {{ errorMsg }}
           </ion-card-content>
@@ -207,6 +212,13 @@
             {{ msg[0] }}
           </ion-card-content>
         </ion-card>
+        <ion-button
+          expand="block"
+          type="submit"
+          @click="createNewProduct()"
+          :disabled="disableCreateButton"
+          >Save</ion-button
+        >
       </div>
       <ion-row class="scan-button" v-if="scanActive">
         <ion-col class="ion-no-padding">
@@ -225,12 +237,16 @@ import {
   IonBackButton,
   IonSelect,
   onIonViewWillLeave,
+  modalController
 } from "@ionic/vue";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
 import { createProduct } from "@/services/products.services";
 import { BarcodeScanner } from "@capacitor-community/barcode-scanner";
+import SelectCustomerMode from "../components/models/SelectCustomerMode.vue";
+import { emitter } from "@/services/emitter";
 
+let selectCustomerModelVue: any;
 export default {
   name: "NewProduct",
   components: {
@@ -243,7 +259,7 @@ export default {
     const stateDefault = {
       name: "",
       sku: "",
-      errorMsg: "",
+      errorMsg: "" as any,
       batches: [] as any,
       disableCreateButton: false,
       scanActive: false,
@@ -268,9 +284,32 @@ export default {
         { key: "packet", name: "Packet" },
         { key: "tonne", name: "Tonne (t)" },
         { key: "ounce", name: "Ounce (OZ)" },
+        { key: "lolo", name: "Lolo" },
+        { key: "foils", name: "Foils" },
+        { key: "sachet_foil", name: "Sachet foil" },
+        { key: "label", name: "Label" },
+        { key: "outer", name: "Outer" },
       ],
     }
     const state = reactive({...stateDefault});
+    emitter.on("select_customer_event", async (ob: any) => {
+      state.batches[ob.batchId]['purchase_from'] = ob;
+      await selectCustomerModelVue.dismiss();
+    });
+    emitter.on("close_customer_model", async () => {
+      if (selectCustomerModelVue) {
+        await selectCustomerModelVue.dismiss();
+      }
+    });
+    const openSelectProductModel = async (batchId: any) => {
+      selectCustomerModelVue = await modalController.create({
+        component: SelectCustomerMode,
+        componentProps: { 
+          batchId: batchId,
+        }
+      });
+      return selectCustomerModelVue.present();
+    };
     const checkPermission = () => {
       return new Promise((resolve, reject) => {
         BarcodeScanner.checkPermission({ force: true }).then(status=>{
@@ -362,9 +401,15 @@ export default {
       createProduct(state.name, state.sku, state.batches)
         .then((res: any) => {
           state.disableCreateButton = false;
-          if (res.data.error) {
-            state.errorMsg = res.response.data.error;
-            return;
+          if (!res.data.success) {
+            state.errorMsg = "Error Please Try Again"
+            if (res.data.error) {
+              state.errorMsg = res.data.error
+            }
+            if (res.data.errors) {
+              state.errorMsg = res.data.errors
+            }
+            return
           }
           router.push("/products");
         })
@@ -389,12 +434,12 @@ export default {
     };
     const addBatch = () => {
       state.batches.push({
-        'batch_id': state.batches.length,
         'purchased_at': "",
         'purchasing_price': 0,
         quantity: 0,
         'measurement_unit': "",
         'selling_price': 0,
+        'purchase_from': {'company_name':""}
       });
     };
     const deleteBatch = (id: any) => {
@@ -402,7 +447,6 @@ export default {
         const batches = state.batches;
         batches.splice(id, 1);
         state.batches = batches;
-        console.log(state.batches);
       }
     };
     return {
@@ -412,7 +456,8 @@ export default {
       addBatch,
       deleteBatch,
       createNewProduct,
-      stopScanner
+      stopScanner,
+      openSelectProductModel
     };
   },
 };

@@ -14,8 +14,8 @@ export const getHome = async ()=>{
     }
   };
   let url = baseUrl+'home/';
-  if(selectedShop && selectedShop.id){
-    url += selectedShop.id
+  if(selectedShop && selectedShop.shop && selectedShop.shop.id){
+    url += selectedShop.shop.id
   }
   return axios.get(url,args);
 }

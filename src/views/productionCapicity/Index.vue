@@ -14,7 +14,7 @@
           v-for="(product, key) in productionProducts"
           :key="key"
           :value="key"
-          v-on:click="router.push('/production-products/new')"
+          v-on:click="router.push('/production-products/'+product.id)"
         >
           <ion-label>
             <h2>{{ product.name }}</h2>

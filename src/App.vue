@@ -9,7 +9,7 @@
         <ion-content>
           <ion-list id="inbox-list">
             <ion-list-header>{{ user.name }}</ion-list-header>
-            <ion-note>{{ selectedShop.name }}</ion-note>
+            <ion-note>{{ selectedShop && selectedShop.shop?.name }}</ion-note>
 
             <ion-menu-toggle
               auto-hide="false"
@@ -23,6 +23,7 @@
                 detail="false"
                 class="hydrated"
                 :class="{ selected: p.url === router.fullPath }"
+                v-if="selectedShop?.id != null && checkIfUserHavePermission(p)"
               >
                 <ion-icon
                   slot="start"
@@ -32,25 +33,29 @@
                 <ion-label>{{ p.title }}</ion-label>
               </ion-item>
             </ion-menu-toggle>
-            <ion-item v-on:click='logOut()'
-                lines="none"
-                detail="false"
-                class="hydrated">
+            <ion-item
+              v-on:click="logOut()"
+              lines="none"
+              detail="false"
+              class="hydrated"
+            >
               <ion-icon
-                  slot="start"
-                  :ios="logOutSharp"
-                  :md="logOutOutline"
+                slot="start"
+                :ios="logOutSharp"
+                :md="logOutOutline"
               ></ion-icon>
-            <ion-label>Log Out</ion-label>
+              <ion-label>Log Out</ion-label>
             </ion-item>
           </ion-list>
           <ion-item>
             <ion-label>Selected Shop</ion-label>
             <ion-select
-              :placeholder="(selectedShop.name?selectedShop.name:'Select One')"
+              :placeholder="
+                selectedShop && (selectedShop.shop?.name ? selectedShop.shop?.name : 'Select One')
+              "
               @ionChange="selectShop($event.target.value)"
               multiple="false"
-              :value="selectedShop.id"
+              :value="selectedShop.shop?.id"
             >
               <ion-select-option
                 v-for="shop in userShops"
@@ -83,6 +88,8 @@ import {
   IonRouterOutlet,
   IonSplitPane,
   IonSelect,
+onIonViewDidEnter,
+onIonViewWillEnter,
 } from "@ionic/vue";
 import { defineComponent, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
@@ -102,7 +109,7 @@ import {
   calculatorOutline,
   calculatorSharp,
   logOutOutline,
-  logOutSharp
+  logOutSharp,
 } from "ionicons/icons";
 import { all } from "@/services/shops.services";
 import { Storage } from "@ionic/storage";
@@ -128,10 +135,10 @@ export default defineComponent({
   setup() {
     const state = reactive({
       user: {},
-      userShops:[],
+      userShops: [],
       selectedShop: {
-        id:"",
-        name:""
+        id: null,
+        name: null,
       } as any,
     });
     const appPages = [
@@ -140,85 +147,111 @@ export default defineComponent({
         url: "/",
         iosIcon: homeOutline,
         mdIcon: homeSharp,
+        permisisons: [],
       },
       {
         title: "Shops",
         url: "/shops",
         iosIcon: storefrontOutline,
         mdIcon: storefrontSharp,
+        permisisons: [],
       },
       {
         title: "Products",
         url: "/products",
         iosIcon: cubeOutline,
         mdIcon: cubeSharp,
+        permisisons: ["can_create_products", "can_edit_products"],
       },
       {
         title: "Production Products",
         url: "/production-products",
         iosIcon: calculatorOutline,
         mdIcon: calculatorSharp,
+        permisisons: [],
       },
       {
         title: "Customers / Sellers",
         url: "/customers",
         iosIcon: personOutline,
         mdIcon: personSharp,
+        permisisons: ["can_create_customers", "can_edit_customers"],
       },
       {
         title: "Ledger",
         url: "/ledger",
         iosIcon: readerOutline,
         mdIcon: readerSharp,
+        permisisons: [
+          "can_create_entries_in_ledger",
+          "can_edit_entries_in_ledger",
+        ],
       },
     ];
     const router = useRouter();
     const store = new Storage();
-    let selectedShop = "";
-    const loadShops = ()=>{
-      all().then(async(res)=>{
-        state.userShops = res.data.shops;
-        if(!state.userShops || state.userShops.length == 0) {
-          router.push('/shops/new');
-        }else if(!selectedShop){
-          state.selectedShop = state.userShops[0]
-          await store.set("selectedShop", JSON.stringify(state.selectedShop));
-        }
-      }).catch(()=>{
-        alert('Please check your internet');
-      }); 
-      }
+    const loadShops = () => {
+      all()
+        .then(async (res) => {
+          state.userShops = res.data.shops;
+          if (!state.userShops || state.userShops.length == 0) {
+            router.push("/shops/new");
+          } else if (!state.selectedShop || state.selectedShop.id === null) {
+            state.selectedShop = state.userShops[0];
+            await store.set("selectedShop", JSON.stringify(state.selectedShop));
+          }
+          console.log(state.selectedShop + "  <<")
+        })
+        .catch(() => {
+          alert("Please check your internet");
+        });
+    };
     const setupApp = async () => {
       await store.create();
       state.user = await store.get("user");
-      if(!state.user){
+      if (!state.user) {
         return;
       }
-      selectedShop = JSON.parse(await store.get("selectedShop"));
-      if(selectedShop){
-        state.selectedShop = selectedShop;
-      }
+      const selectedShop = await store.get('selectedShop')
+      state.selectedShop = JSON.parse(selectedShop);
       loadShops();
     };
-    setupApp();
+    
     const selectShop = async (e: any) => {
       state.userShops.forEach(async (shop: any) => {
-        if(shop.shop.id == e){
-          state.selectedShop = shop.shop
-          await store.set("selectedShop", JSON.stringify(shop.shop));
-          router.push('/');
+        if (shop.shop.id == e) {
+          state.selectedShop = shop;
+          await store.set("selectedShop", JSON.stringify(shop));
+          router.push("/");
         }
       });
     };
-    const logOut = async ()=>{
+    const logOut = async () => {
       await store.clear();
-      router.push('/login');
-    }
+      router.push("/login");
+    };
 
     emitter.on("sidebar_load_shops", () => {
       loadShops();
     });
 
+    const checkIfUserHavePermission = (p: any) => {
+      if (p.permisisons.length == 0) {
+        return true
+      }
+      let havePermission = false;
+      for (let index = 0; index < p.permisisons.length; index++) {
+        if (
+          state.selectedShop[p.permisisons[index]] !== null &&
+          state.selectedShop[p.permisisons[index]]
+        ) {
+          havePermission = true;
+          break;
+        }
+      }
+      return havePermission;
+    };
+    setupApp()
     return {
       ...toRefs(state),
       selectShop,
@@ -241,6 +274,7 @@ export default defineComponent({
       logOutSharp,
       logOut,
       router,
+      checkIfUserHavePermission,
     };
   },
 });

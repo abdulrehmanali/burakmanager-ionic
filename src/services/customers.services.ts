@@ -8,7 +8,7 @@ export const allCustomers = async (name = '')=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+(selectedShop['id'])+'/customers',{
+  return axios.get(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/customers',{
     params: {
       search: name
     },
@@ -22,7 +22,7 @@ export const getCustomer = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+(selectedShop['id'])+'/customers/'+id,{
+  return axios.get(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/customers/'+id,{
     headers: {
       'Authorization': token
     } 
@@ -33,7 +33,7 @@ export const createCustomer = async (name: string, email: string, phoneNumber: s
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.post(baseUrl+'shops/'+selectedShop['id']+'/customers',{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/customers',{
       name,
       email,
       'phone_number':phoneNumber,
@@ -51,7 +51,7 @@ export const updateCustomer = async (id: string, name: string, email: string, ph
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.post(baseUrl+'shops/'+selectedShop['id']+'/customers/'+id,{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/customers/'+id,{
     name,
     email,
     'phone_number':phoneNumber,

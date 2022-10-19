@@ -94,6 +94,9 @@ export default {
     });
     getHome().then(async (res) => {
       await store.create();
+      store.get('user').then(u=>{
+        console.log(u)
+      })
       state.invitations = res.data.invitations;
       state.numberOfItems = res.data.numberOfItems;
       state.numberOfProducts = res.data.numberOfProducts;

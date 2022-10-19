@@ -8,7 +8,7 @@ export const allProducts = async (search: any = "")=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+selectedShop['id']+'/products',{
+  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/products',{
     params: {
       search: search
     },
@@ -22,7 +22,7 @@ export const getProduct = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+selectedShop['id']+'/products/'+id,{
+  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/products/'+id,{
     headers: {
       'Authorization': token
     } 
@@ -32,7 +32,7 @@ export const createProduct = async (name: string, sku: string, batches: Array<an
   store.create();
   const token = await store.get('token');
   const selectedShop: any = JSON.parse(await store.get('selectedShop'));
-  return axios.post(baseUrl+'shops/'+selectedShop['id']+'/products',{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/products',{
     name,
     sku,
     batches
@@ -46,7 +46,7 @@ export const updateProduct = async (id: string, name: string, sku: string, batch
   store.create();
   const token = await store.get('token');
   const selectedShop: any = JSON.parse(await store.get('selectedShop'));
-  return axios.post(baseUrl+'shops/'+selectedShop['id']+'/products/'+id,{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/products/'+id,{
     name,
     sku,
     batches

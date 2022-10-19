@@ -16,7 +16,7 @@
     >
     <ion-label>
       <h2>{{ customer.name }}</h2>
-      <h4>{{ customer.contact_number }}</h4>
+      <h4>{{ customer.company_name }}</h4>
     </ion-label>
     </ion-item>
   </ion-list>
@@ -30,6 +30,7 @@ import { emitter } from "@/services//emitter";
 import { allCustomers } from "@/services/customers.services";
 import { closeOutline } from "ionicons/icons";
 
+let batchId = 0;
 export default defineComponent({
   name: 'SelectCustomerMode',
   setup() {
@@ -47,6 +48,7 @@ export default defineComponent({
     }
     getCustomers();
     const onCustomerClick = (customer) => {
+      customer.batchId = batchId
       emitter.emit('select_customer_event',JSON.parse(JSON.stringify(customer)))
     }
     const closeModel = () =>{
@@ -54,7 +56,13 @@ export default defineComponent({
     }
     return { ...toRefs(state), onCustomerClick, closeModel, closeOutline};
   },
-  components: { IonContent, IonHeader, IonTitle, IonToolbar }
+  created() {
+    batchId = this.batchId
+  },
+  components: { IonContent, IonHeader, IonTitle, IonToolbar },
+  props: [
+    'batchId'
+  ]
 });
 </script>
 <style scoped>

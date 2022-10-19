@@ -9,7 +9,7 @@ export const allLedgerEntries = async ()=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+(selectedShop['id'])+'/ledger',{
+  return axios.get(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/ledger',{
     headers: {
       'Authorization': token
     } 
@@ -20,7 +20,7 @@ export const getLedgerEntry = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+(selectedShop['id'])+'/ledger/'+id,{
+  return axios.get(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/ledger/'+id,{
     headers: {
       'Authorization': token
     } 
@@ -31,7 +31,7 @@ export const deleteLedgerEntry = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.delete(baseUrl+'shops/'+(selectedShop['id'])+'/ledger/'+id,{
+  return axios.delete(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/ledger/'+id,{
     headers: {
       'Authorization': token
     } 
@@ -42,7 +42,7 @@ export const createLedgerEntry = async (entry: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.post(baseUrl+'shops/'+selectedShop['id']+'/ledger',entry,{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/ledger',entry,{
     headers: {
       'Authorization': token
     },
@@ -53,7 +53,7 @@ export const updateLedgerEntry = async (id: string, entry: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.post(baseUrl+'shops/'+selectedShop['id']+'/ledger/'+id,entry,{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/ledger/'+id,entry,{
     headers: {
       'Authorization': token
     },
@@ -65,7 +65,7 @@ export const getReciptUrl = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return baseUrl+'shops/'+selectedShop['id']+'/ledger/'+id+'/recipt';
+  return baseUrl+'shops/'+selectedShop['shop']['id']+'/ledger/'+id+'/recipt';
 }
 export const getReciptBase64 = async (id: any)=>{
   const url = await getReciptUrl(id);

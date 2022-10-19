@@ -554,10 +554,10 @@ export default {
       });
     }
     const recivedAmmountUpdate = (e: any) => {
+      state.amountReceived = e.target.value;
       if (e.target.value >= state.total) {
         state.paymentStatus = ((state.type == 'credit')?'received':'sended')
       } else {
-        state.amountReceived = e.target.value;
         state.paymentStatus = 'pending';
       }
     }

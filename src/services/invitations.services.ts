@@ -18,7 +18,7 @@ export const deleteInvitation = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.delete(baseUrl+'shops/'+selectedShop['id']+'/invitaions/'+id,{
+  return axios.delete(baseUrl+'shops/'+selectedShop['shop']['id']+'/invitaions/'+id,{
     headers: {
       'Authorization': token
     }
