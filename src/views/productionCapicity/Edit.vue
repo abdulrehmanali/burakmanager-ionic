@@ -223,6 +223,9 @@
             <ion-button v-on:click="getProductionCapicityPdf()">
               Get PDF
             </ion-button>
+            <ion-button v-on:click="generateProductionProduct()" v-if="maxProducibleProducts != 0">
+              Generate Product
+            </ion-button>
             <p v-if="errorMsg" class="error-message">
               {{ errorMsg }}
             </p>
@@ -239,7 +242,7 @@ import { reactive, toRefs } from "@vue/reactivity";
 import SelectProductModelVue from "../components/models/SelectProductModel.vue";
 import { emitter } from "@/services/emitter";
 import { trash } from "ionicons/icons";
-import { getProductionProduct, getProductionProductPdf, updateProductionProduct } from "@/services/productionProducts.services";
+import { GenerateProduct, getProductionProduct, getProductionProductPdf, updateProductionProduct } from "@/services/productionProducts.services";
 import router from "@/router";
 import { useRoute } from 'vue-router';
 
@@ -379,6 +382,25 @@ export default {
         window.open(url)
       })
     }
+    const generateProductionProduct = () => {
+      const requiredQuantity = prompt("Please enter the Required Quantity")
+      if (requiredQuantity == null) {
+        return;
+      }
+      if (requiredQuantity > state.maxProducibleProducts) {
+        alert('You dont have enough stock to generate this quantity.')
+        return;
+      }
+      GenerateProduct(id, requiredQuantity).then(res=>{
+        console.log()
+        if (!res.data.success) {
+          alert('Error');
+          return;
+        }
+        alert('Generate');
+        router.push("/production-products");
+      })
+    }
     return {
       ...toRefs(state),
       openSelectProductModal,
@@ -389,6 +411,7 @@ export default {
       calculateAdditionalRequired,
       crateNewProductionCapicity,
       getProductionCapicityPdf,
+      generateProductionProduct
     };
   },
 };

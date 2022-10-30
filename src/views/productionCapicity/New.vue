@@ -329,6 +329,7 @@ export default {
         state.errorMsg = error.message;
       }
     };
+
     return {
       ...toRefs(state),
       openSelectProductModal,

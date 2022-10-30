@@ -242,7 +242,7 @@
           <ion-card-content>
             <ion-list>
               <ion-item
-                v-for="product in productionProducts.products"
+                v-for="product in productionProducts"
                 :key="product.sku"
                 :value="product.sku"
               >
@@ -256,10 +256,8 @@
                       </p>
                     </ion-col>
                     <ion-col>
-                      <ion-label
-                        >{{ product.one_product_quantity }}
-                        {{ product.measurement_unit }}</ion-label
-                      >
+                      <ion-label>Required Quantity</ion-label>
+                      <p>{{ product.one_product_quantity }} {{ product.measurement_unit }}</p>
                     </ion-col>
                   </ion-row>
                 </ion-grid>

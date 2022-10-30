@@ -55,6 +55,18 @@ export const createProductionProduct = async (name: string, price: string, sku: 
     },
   });
 }
+export const GenerateProduct = async (id: any, quantity: any)=>{
+  store.create();
+  const token = await store.get('token');
+  const selectedShop: any = JSON.parse(await store.get('selectedShop'));
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/produciton-products/'+id+'/create-product',{
+    quantity,
+  },{
+    headers: {
+      'Authorization': token
+    },
+  });
+}
 export const updateProductionProduct = async (id: any, name: string, price: string, sku: string, products: Array<any>)=>{
   store.create();
   const token = await store.get('token');
