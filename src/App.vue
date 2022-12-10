@@ -200,7 +200,6 @@ export default defineComponent({
             state.selectedShop = state.userShops[0];
             await store.set("selectedShop", JSON.stringify(state.selectedShop));
           }
-          console.log(state.selectedShop + "  <<")
         })
         .catch(() => {
           alert("Please check your internet");

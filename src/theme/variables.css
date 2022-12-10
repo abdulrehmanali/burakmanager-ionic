@@ -76,6 +76,10 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-light-tint: #f5f6f9;
 }
 
+ion-menu {
+  --side-max-width : 120px;
+}
+
 @media (prefers-color-scheme: dark) {
   /*
    * Dark Colors
@@ -234,6 +238,7 @@ http://ionicframework.com/docs/theming/ */
     --ion-card-background: #1e1e1e;
   }
 }
+
 .error-message {
   color: #842029;
   background-color: #f8d7da;

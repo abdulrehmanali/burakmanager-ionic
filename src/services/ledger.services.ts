@@ -4,16 +4,21 @@ const baseUrl = process.env.VUE_APP_API_BASE_URL;
 import { Storage } from '@ionic/storage';
 const store = new Storage();
 
-export const allLedgerEntries = async ()=>{
+export const allLedgerEntries = async (search: object, print = false)=>{
   store.create();
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/ledger',{
+  const extraParam: any = {
     headers: {
       'Authorization': token
-    } 
-  });
+    },
+    params: {...search, print}
+  }
+  if (print == true) {
+    extraParam.responseType= 'blob';
+  }
+  return axios.get(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/ledger',extraParam);
 }
 export const getLedgerEntry = async (id: any)=>{
   store.create();

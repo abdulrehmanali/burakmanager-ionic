@@ -110,6 +110,10 @@
                 <ion-label> Max Product Generation Capicity </ion-label>
                 <ion-label slot="end">{{ maxProducibleProducts }}</ion-label>
               </ion-item>
+              <ion-item>
+                <ion-label> Manufacturing Cost Of Single Product<br><small>(Calculated only based on raw material)</small> </ion-label>
+                <ion-label slot="end">{{ getManufacturingCost() }}</ion-label>
+              </ion-item>
             </ion-list>
           </ion-card-content>
         </ion-card>
@@ -313,12 +317,9 @@ export default {
       calculateProducts();
     };
     const calculateAdditionalRequired = (product: any) => {
-      console.log(JSON.parse(JSON.stringify(product)))
-
       let additionalRequired = 0;
       const customQuantity =
         state.customQuantity * parseFloat(product["one_product_quantity"]);
-        console.log(customQuantity)
       if (customQuantity > product.product.quantity) {
         additionalRequired = customQuantity - product.product.quantity;
       }
@@ -333,8 +334,10 @@ export default {
           sp.quantity = 0
           sp.measurementUnit = null
           sp.product.batches.forEach((b: any) => {
-            sp.quantity += parseFloat(b.quantity)
-            sp.measurementUnit = b.measurement_unit
+            if (b.status == 'active') {
+              sp.quantity += parseFloat(b.quantity)
+              sp.measurementUnit = b.measurement_unit
+            }
           });
           state.selectedProducts[i]['product'].quantity = sp.quantity
           state.selectedProducts[i]['product']['measurement_unit'] = sp.measurementUnit
@@ -392,7 +395,6 @@ export default {
         return;
       }
       GenerateProduct(id, requiredQuantity).then(res=>{
-        console.log()
         if (!res.data.success) {
           alert('Error');
           return;
@@ -400,6 +402,25 @@ export default {
         alert('Generate');
         router.push("/production-products");
       })
+    }
+    const getManufacturingCost = ()=>{
+      // let totalPrice = 0;
+      //   for (let i = 0; i < state.selectedProducts.length; i++) {
+      //     const sp = state.selectedProducts[i];
+      //     console.log(sp)
+      //     let bPrice = 0;
+      //     let bTotal = 0;
+      //     sp.product.batches.forEach((b: any) => {
+      //       if (b.status == 'active') {
+      //         bPrice += (parseFloat(b.selling_price))
+      //         bTotal++
+      //       }
+      //     });
+      //     totalPrice += sp.one_product_quantity / (bPrice / bTotal)
+      //   }
+      //   totalPrice = totalPrice/state.selectedProducts.length
+      //   return totalPrice
+      return 'N/A'
     }
     return {
       ...toRefs(state),
@@ -411,7 +432,8 @@ export default {
       calculateAdditionalRequired,
       crateNewProductionCapicity,
       getProductionCapicityPdf,
-      generateProductionProduct
+      generateProductionProduct,
+      getManufacturingCost
     };
   },
 };

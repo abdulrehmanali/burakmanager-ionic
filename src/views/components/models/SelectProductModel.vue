@@ -18,7 +18,7 @@
         >
         <ion-grid>
           <ion-row>
-            <ion-col size="12">
+            <ion-col size="12" >
               <ion-label>
                 <h2>{{ product.name }}</h2>
                 <p>{{ (product.batches?product.batches.length:0) }} Batches</p>
@@ -26,7 +26,7 @@
             </ion-col>
           </ion-row>
           <ion-row  v-for="(batch,k) in product.batches" :key="k" class="product-batches" v-on:click="onProductClick(product,k)">
-            <ion-col size="12" v-if="batch.quantity > 0">
+            <ion-col size="12" v-if="batch.quantity > 0 && batch.status == 'active'">
               <b>Selling Price: {{ batch.selling_price }}</b>
               <p>{{ batch.quantity }} {{ batch.measurement_unit }} in stock</p>
             </ion-col>

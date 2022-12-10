@@ -31,20 +31,6 @@
           </ion-card-content>
         </ion-card>
         <ion-card>
-          <ion-card-content>
-            <ion-item lines="none">
-              <ion-label>Date</ion-label>
-              <ion-input
-                v-model="createdAt"
-                :value="createdAt"
-                @keyup="createdAt = $event.target.value"
-                type="Date"
-                placeholder="Date"
-              ></ion-input>
-            </ion-item>
-          </ion-card-content>
-        </ion-card>
-        <ion-card>
           <ion-card-header>
             <ion-row class="ion-align-items-start">
               <ion-col>
@@ -216,70 +202,114 @@
 
         <ion-card>
           <ion-card-content>
+            <ion-row class="ion-align-items-start">
+              <ion-col>
+                <ion-card-title style="margin: 10px 0px"
+                  >Payments's</ion-card-title
+                >
+              </ion-col>
+              <ion-col>
+                <ion-button
+                  @click="addPayments"
+                  class="ion-float-end"
+                  >Add Payment</ion-button
+                >
+              </ion-col>
+            </ion-row>
+            <ion-list v-for="(payment, k) in payments" :key="k">
               <ion-item lines="none">
                 <ion-label position="floating">Payment Method: </ion-label>
                 <ion-select
-                  v-model="paymentMethod"
-                  @change="paymentMethod = $event.target.value"
+                  v-model="payment.method"
+                  @change="payment.method = $event.target.value"
                   ok-text="Okay"
                   cancel-text="Dismiss"
                 >
                   <ion-select-option
                     value="cash"
-                    :selected="paymentMethod == 'cash'"
+                    :selected="payment.method == 'cash'"
                     >Cash</ion-select-option
                   >
                   <ion-select-option
                     value="cheque"
-                    :selected="paymentMethod == 'cheque'"
+                    :selected="payment.method == 'cheque'"
                     >Cheque</ion-select-option
                   >
                   <ion-select-option
                     value="bankTransfer"
-                    :selected="paymentMethod == 'bankTransfer'"
+                    :selected="payment.method == 'bankTransfer'"
                     >Bank Transfer</ion-select-option
                   >
                 </ion-select>
               </ion-item>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card v-if="paymentMethod == 'cheque' || paymentMethod == 'bankTransfer'">
-          <ion-card-content>
               <ion-item lines="none">
+                <ion-label position="floating">Payment Status: </ion-label>
+                <ion-select
+                  v-model="payment.status"
+                  @change="payment.status = $event.target.value"
+                  ok-text="Okay"
+                  cancel-text="Dismiss"
+                >
+                  <ion-select-option
+                    :value="((type == 'credit')?'received':'sended')"
+                    :selected="payment.status == ((type == 'credit')?'received':'sended')"
+                    >{{ ((type == 'credit')?'Received':'Sended') }}</ion-select-option
+                  >
+                  <ion-select-option
+                    value="pending"
+                    :selected="payment.status == 'pending'"
+                    >Pending</ion-select-option
+                  >
+                  <ion-select-option
+                    value="on-hold"
+                    :selected="payment.status == 'on-hold'"
+                    >On Hold</ion-select-option
+                  >
+                </ion-select>
+              </ion-item>
+              <ion-item lines="none">
+                <ion-label>{{type == 'credit' ? 'Recived':'Send'}} Amount: </ion-label>
+                <ion-input
+                  type="number"
+                  @keyup="(payment.amount = $event.target.value)"
+                  :value="payment.amount"
+                  :maxlength="total"
+                  class="ion-text-right"
+                ></ion-input>
+                <ion-label slot="end">Rs</ion-label>
+              </ion-item>
+              <ion-item lines="none"  v-if="payment.method == 'cheque' || payment.method == 'bankTransfer'">
                 <ion-label position="floating">Bank Name: </ion-label>
                 <ion-input
                   type="text"
-                  @keyup="bankName = $event.target.value"
-                  :value="bankName"
+                  @keyup="payment.bank_name = $event.target.value"
+                  :value="payment.bank_name"
                 ></ion-input>
               </ion-item>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card v-if="paymentMethod == 'cheque'">
-          <ion-card-content>
-              <ion-item lines="none">
+              <ion-item lines="none" v-if="payment.method == 'cheque'">
                 <ion-label position="floating">Cheque Number: </ion-label>
                 <ion-input
                   type="text"
-                  @keyup="chequeNumber = $event.target.value"
-                  :value="chequeNumber"
+                  @keyup="payment.cheque_number = $event.target.value"
+                  :value="payment.cheque_number"
                 ></ion-input>
               </ion-item>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card v-if="paymentMethod == 'bankTransfer'">
-          <ion-card-content>
-              <ion-item lines="floating">
+              <ion-item lines="floating" v-if="payment.method == 'bankTransfer'">
                 <ion-label position="stacked">Transaction Id: </ion-label>
                 <ion-input
                   type="text"
-                  @keyup="transactionId = $event.target.value"
-                  :value="transactionId"
+                  @keyup="payment.transaction_id = $event.target.value"
+                  :value="payment.transaction_id"
                 ></ion-input>
               </ion-item>
+              <ion-item>
+                <ion-button
+                  @click="deletePayment(k)"
+                  class="ion-float-end"
+                  >Delete Payment</ion-button
+                >
+              </ion-item>
+            </ion-list>
           </ion-card-content>
         </ion-card>
 
@@ -288,52 +318,6 @@
               <ion-item lines="none">
                 <ion-label>Total: </ion-label>
                 <ion-label slot="end">{{ getTotal() }}</ion-label>
-              </ion-item>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-content>
-              <ion-item lines="none">
-                <ion-label>{{type == 'credit' ? 'Recived':'Send'}} Amount: </ion-label>
-                <ion-input
-                  type="number"
-                  @keyup="recivedAmmountUpdate($event)"
-                  :value="amountReceived"
-                  :maxlength="total"
-                  class="ion-text-right"
-                ></ion-input>
-                <ion-label slot="end">Rs</ion-label>
-              </ion-item>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card>
-          <ion-card-content>
-              <ion-item lines="none">
-                <ion-label position="floating">Payment Status: </ion-label>
-                <ion-select
-                  v-model="paymentStatus"
-                  @change="paymentStatus = $event.target.value"
-                  ok-text="Okay"
-                  cancel-text="Dismiss"
-                >
-                  <ion-select-option
-                    :value="((type == 'credit')?'received':'sended')"
-                    :selected="paymentStatus == ((type == 'credit')?'received':'sended')"
-                    >{{ ((type == 'credit')?'Received':'Sended') }}</ion-select-option
-                  >
-                  <ion-select-option
-                    value="pending"
-                    :selected="paymentStatus == 'pending'"
-                    >Pending</ion-select-option
-                  >
-                  <ion-select-option
-                    value="on-hold"
-                    :selected="paymentStatus == 'on-hold'"
-                    >On Hold</ion-select-option
-                  >
-                </ion-select>
               </ion-item>
           </ion-card-content>
         </ion-card>
@@ -404,21 +388,16 @@ export default {
   setup() {
     const state = reactive({
       errorMsg: "",
-      createdAt: new Date().toISOString().split('T')[0],
       type: "credit",
       selectedProducts: [] as any,
       customer: {} as any,
       customers: [] as any,
       searchProducts: [] as any,
+      payments: [] as any,
       loadingProducts: false,
       loadingCustomers: false,
-      paymentMethod: "cash",
-      bankName: "",
-      chequeNumber: "",
-      transactionId: "",
       total: 0,
       amountReceived: 0,
-      paymentStatus: "pending",
       note: "",
       selectProductModelVue: "" as any,
       selectCustomerModelVue: "" as any
@@ -429,19 +408,17 @@ export default {
         createLedgerEntry({
           type: state.type,
           products: state.selectedProducts,
+          payments: state.payments,
           'customer_id': state.customer.id,
           'customer_name': state.customer.name,
-          'payment_method': state.paymentMethod,
-          'bank_name': state.bankName,
-          'cheque_number': state.chequeNumber,
-          'transaction_id': state.transactionId,
           total: state.total,
-          'amount_received': state.amountReceived,
-          'payment_status': state.paymentStatus,
-          'created_at': state.createdAt,
           note: state.note,
-        }).then(()=>{
-          router.back();
+        }).then((res)=>{
+          if (res.data.success) {
+            router.back();
+            return;
+          }
+          alert('Error!! '+res.data.message)
         }).catch(err=>{
           if(err.response.data.errors) {
             state.errorMsg = err.response.data.errors;
@@ -511,14 +488,6 @@ export default {
         showBatches: false
       });
     }
-    const recivedAmmountUpdate = (e: any) => {
-      if (e.target.value >= state.total) {
-        state.paymentStatus = ((state.type == 'credit')?'received':'sended')
-      } else {
-        state.amountReceived = e.target.value;
-        state.paymentStatus = 'pending';
-      }
-    }
     const searchProduct = (product: any) => {
       product.searchProducts = [];
       if (productsTimeout != null) {
@@ -575,6 +544,19 @@ export default {
         product.quantity  = product.stockQuantity
       }
     }
+    const deletePayment = (paymentId: number) => {
+      state.payments.splice(paymentId, 1);
+    }
+    const addPayments = () => {
+      state.payments.push({
+        'method':'cash',
+        'status': 'pending',
+        'amount': 0.00,
+        'bank_name': '',
+        'transaction_id': '',
+        'cheque_number': '',
+      });
+    }
     onIonViewWillLeave(() => {
       state.errorMsg =  "",
       state.type = "credit",
@@ -584,13 +566,8 @@ export default {
       state.searchProducts = [] as any,
       state.loadingProducts = false,
       state.loadingCustomers = false,
-      state.paymentMethod = "cash",
-      state.bankName = "",
-      state.chequeNumber = "",
-      state.transactionId = "",
       state.total = 0,
       state.amountReceived = 0,
-      state.paymentStatus = "pending",
       state.note = "",
       state.selectProductModelVue = "" as any,
       state.selectCustomerModelVue = "" as any
@@ -600,18 +577,19 @@ export default {
       crateNewEntry,
       typeChanged,
       addProduct,
+      addPayments,
       deleteSelectedProduct,
       trash,
       pencil,
       getTotal,
       getCustomers,
       onCustomerClick,
-      recivedAmmountUpdate,
       searchProduct,
       onProductClick,
       arrowDown,
       arrowUp,
-      updateRequiredQuantity
+      updateRequiredQuantity,
+      deletePayment
     };
   },
 };
