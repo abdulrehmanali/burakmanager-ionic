@@ -83,7 +83,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import ('../views/customers/New.vue'),
     meta:{haveSideBar:true,equiresAuth:true}
   },
-
   {
     path: '/ledger',
     component: () => import ('../views/ledger/Index.vue'),
@@ -94,9 +93,24 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import ('../views/ledger/New.vue'),
     meta:{haveSideBar:true,requiresAuth:true}
   },
-    {
+  {
     path: '/ledger/:id',
     component: () => import ('../views/ledger/Edit.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
+    path: '/receivings',
+    component: () => import ('../views/receivings/Index.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
+    path: '/receivings/new',
+    component: () => import ('../views/receivings/New.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
+    path: '/receivings/:id',
+    component: () => import ('../views/receivings/Edit.vue'),
     meta:{haveSideBar:true,requiresAuth:true}
   },
 ]
