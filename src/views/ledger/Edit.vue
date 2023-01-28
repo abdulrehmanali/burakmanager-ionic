@@ -309,7 +309,7 @@
               </ion-item>
               <ion-item>
                 <ion-button
-                  @click="deletePayment(k)"
+                  @click="deletePayment(payment, k)"
                   class="ion-float-end"
                   >Delete Payment</ion-button
                 >
@@ -374,12 +374,13 @@ import {
   IonInput,
   IonSelect,
   onIonViewWillLeave,
-  onIonViewWillEnter
+  onIonViewWillEnter,
+  loadingController
 } from "@ionic/vue";
 import router from "@/router";
 import { reactive, toRefs } from "@vue/reactivity";
 import { trash, pencil, arrowDown, arrowUp } from "ionicons/icons";
-import { deleteLedgerEntry, getLedgerEntry, updateLedgerEntry } from "@/services/ledger.services";
+import { deleteEntryFromLedger, deleteLedgerEntry, getLedgerEntry, updateLedgerEntry } from "@/services/ledger.services";
 import { allCustomers } from "@/services/customers.services";
 import { allProducts } from "@/services/products.services";
 import { useRoute } from 'vue-router';
@@ -593,8 +594,15 @@ export default {
       //   product.quantity  = product.stockQuantity
       // }
     }
-    const deletePayment = (paymentId: number) => {
-      state.payments.splice(paymentId, 1);
+    const deletePayment = async (paymentObject: any, paymentId: any) => {
+      const loading = await loadingController.create({
+        message: 'Deleting...',
+      });
+      loading.present()
+      deleteEntryFromLedger(id, paymentObject.id).then(res=>{
+        loading.dismiss()
+        state.payments.splice(paymentId, 1);
+      })
     }
     const addPayments = () => {
       state.payments.push({

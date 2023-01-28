@@ -85,3 +85,14 @@ export const getReciptHtml = async (id: any)=>{
   return await axios
   .get(url+'?html=true');
 }
+export const deleteEntryFromLedger = async (id: any, receivingId: any)=>{
+  store.create();
+  const token = await store.get('token');
+  let selectedShop = await store.get('selectedShop');
+  selectedShop = JSON.parse(selectedShop);
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/ledger/'+id+'/delete-receiving/'+receivingId, {}, {
+    headers: {
+      'Authorization': token
+    },
+  });
+}
