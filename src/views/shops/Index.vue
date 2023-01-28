@@ -70,7 +70,9 @@ export default {
       }
       all().then(async(res)=>{
         state.user = await store.get("user");
-        state.shops = res.data.shops;
+        if (res.data.shops != null) {
+          state.shops = res.data.shops;
+        }
         state.loading = false
       }).catch(err=>{
         alert("Please Check your internet")
