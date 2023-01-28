@@ -6,7 +6,7 @@ const store = new Storage();
 export const acceptInvitation = async (id: any)=>{
   store.create();
   const token = await store.get('token');
-  return axios.get(baseUrl+'invitaions/accept/'+id,{
+  return axios.get(baseUrl+'invitations/accept/'+id,{
     headers: {
       'Authorization': token
     }
@@ -18,7 +18,7 @@ export const deleteInvitation = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.delete(baseUrl+'shops/'+selectedShop['shop']['id']+'/invitaions/'+id,{
+  return axios.delete(baseUrl+'shops/'+selectedShop['shop']['id']+'/invitations/'+id,{
     headers: {
       'Authorization': token
     }

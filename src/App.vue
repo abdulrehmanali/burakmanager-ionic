@@ -56,6 +56,7 @@
               @ionChange="selectShop($event.target.value)"
               multiple="false"
               :value="selectedShop.shop?.id"
+              :interface-options="userShops"
             >
               <ion-select-option
                 v-for="shop in userShops"
@@ -88,8 +89,6 @@ import {
   IonRouterOutlet,
   IonSplitPane,
   IonSelect,
-onIonViewDidEnter,
-onIonViewWillEnter,
 } from "@ionic/vue";
 import { defineComponent, reactive, toRefs } from "vue";
 import { useRouter } from "vue-router";
@@ -97,6 +96,8 @@ import {
   cardOutline,
   cardSharp,
   readerOutline,
+  cashSharp,
+  cashOutline,
   readerSharp,
   homeOutline,
   homeSharp,
@@ -147,42 +148,52 @@ export default defineComponent({
         url: "/",
         iosIcon: homeOutline,
         mdIcon: homeSharp,
-        permisisons: [],
+        permissions: [],
       },
       {
         title: "Shops",
         url: "/shops",
         iosIcon: storefrontOutline,
         mdIcon: storefrontSharp,
-        permisisons: [],
+        permissions: [],
       },
       {
         title: "Products",
         url: "/products",
         iosIcon: cubeOutline,
         mdIcon: cubeSharp,
-        permisisons: ["can_create_products", "can_edit_products"],
+        permissions: ["can_create_products", "can_edit_products"],
       },
       {
         title: "Production Products",
         url: "/production-products",
         iosIcon: calculatorOutline,
         mdIcon: calculatorSharp,
-        permisisons: [],
+        permissions: [],
       },
       {
         title: "Customers / Sellers",
         url: "/customers",
         iosIcon: personOutline,
         mdIcon: personSharp,
-        permisisons: ["can_create_customers", "can_edit_customers"],
+        permissions: ["can_create_customers", "can_edit_customers"],
       },
       {
         title: "Ledger",
         url: "/ledger",
         iosIcon: readerOutline,
         mdIcon: readerSharp,
-        permisisons: [
+        permissions: [
+          "can_create_entries_in_ledger",
+          "can_edit_entries_in_ledger",
+        ],
+      },
+      {
+        title: "Receivings",
+        url: "/receivings",
+        iosIcon: cashOutline,
+        mdIcon: cashSharp,
+        permissions: [
           "can_create_entries_in_ledger",
           "can_edit_entries_in_ledger",
         ],
@@ -235,14 +246,14 @@ export default defineComponent({
     });
 
     const checkIfUserHavePermission = (p: any) => {
-      if (p.permisisons.length == 0) {
+      if (p.permissions.length == 0) {
         return true
       }
       let havePermission = false;
-      for (let index = 0; index < p.permisisons.length; index++) {
+      for (let index = 0; index < p.permissions.length; index++) {
         if (
-          state.selectedShop[p.permisisons[index]] !== null &&
-          state.selectedShop[p.permisisons[index]]
+          state.selectedShop[p.permissions[index]] !== null &&
+          state.selectedShop[p.permissions[index]]
         ) {
           havePermission = true;
           break;
