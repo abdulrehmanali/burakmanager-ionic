@@ -8,7 +8,7 @@ export const allProductionProducts = async (search: any = "")=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/produciton-products',{
+  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/production-products',{
     params: {
       search: search
     },
@@ -22,7 +22,7 @@ export const getProductionProduct = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/produciton-products/'+id,{
+  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/production-products/'+id,{
     headers: {
       'Authorization': token
     } 
@@ -33,7 +33,7 @@ export const getProductionProductPdf = async (id: any)=>{
   const token = await store.get('token');
   let selectedShop = await store.get('selectedShop');
   selectedShop = JSON.parse(selectedShop);
-  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/produciton-products/'+id+'.pdf',{
+  return axios.get(baseUrl+'shops/'+selectedShop['shop']['id']+'/production-products/'+id+'.pdf',{
     'responseType': 'blob',
     headers: {
       'Authorization': token,
@@ -44,7 +44,7 @@ export const createProductionProduct = async (name: string, price: string, sku: 
   store.create();
   const token = await store.get('token');
   const selectedShop: any = JSON.parse(await store.get('selectedShop'));
-  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/produciton-products',{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/production-products',{
     name,
     price,
     sku,
@@ -59,7 +59,7 @@ export const GenerateProduct = async (id: any, quantity: any)=>{
   store.create();
   const token = await store.get('token');
   const selectedShop: any = JSON.parse(await store.get('selectedShop'));
-  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/produciton-products/'+id+'/create-product',{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/production-products/'+id+'/create-product',{
     quantity,
   },{
     headers: {
@@ -71,7 +71,7 @@ export const updateProductionProduct = async (id: any, name: string, price: stri
   store.create();
   const token = await store.get('token');
   const selectedShop: any = JSON.parse(await store.get('selectedShop'));
-  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/produciton-products/'+id,{
+  return axios.post(baseUrl+'shops/'+selectedShop['shop']['id']+'/production-products/'+id,{
     name,
     price,
     sku,
