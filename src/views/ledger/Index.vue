@@ -288,6 +288,6 @@ ion-grid.table ion-col{
   border: 0.5px solid var(--ion-color-dark);
   display: flex;
   align-items: center;
-  justify-content: start;
+  justify-content: flex-start;
 }
 </style>
