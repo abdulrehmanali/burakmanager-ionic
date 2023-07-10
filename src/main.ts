@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
-import firebase from 'firebase'
 
 import { IonicVue } from '@ionic/vue';
 
@@ -24,27 +23,6 @@ import '@ionic/vue/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import './registerServiceWorker'
-
-const firebaseConfig = {  
-  apiKey: "AIzaSyC8DbsUxHvzGccLVO1WSP9PqgCR7l19lic",
-  authDomain: "burakmanager.firebaseapp.com",
-  databaseURL: "https://burakmanager-default-rtdb.firebaseio.com",
-  projectId: "burakmanager",
-  storageBucket: "burakmanager.appspot.com",
-  messagingSenderId: "365604377376",
-  appId: "1:365604377376:web:b54f5759b392578f873d45",
-  measurementId: "G-JMDTK00VM9"
-};
-firebase.initializeApp(firebaseConfig);
-export const analytics = firebase.analytics()
-export const db = firebase.firestore();
-export const auth = firebase.auth();
-export const getCurrentUser = new Promise((resolve, reject) => {
-      const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-          unsubscribe();
-          resolve(user);
-      }, reject);
-  });
 
 const app = createApp(App)
   .use(IonicVue)

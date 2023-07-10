@@ -89,6 +89,11 @@ const routes: Array<RouteRecordRaw> = [
     meta:{haveSideBar:true,requiresAuth:true}
   },
   {
+    path: '/ledger/:id/invoice',
+    component: () => import ('../views/ledger/Invoice.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
     path: '/ledger/new',
     component: () => import ('../views/ledger/New.vue'),
     meta:{haveSideBar:true,requiresAuth:true}

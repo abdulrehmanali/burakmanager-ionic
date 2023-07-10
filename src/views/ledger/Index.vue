@@ -94,6 +94,12 @@
               >
             <ion-button>View</ion-button>
             </router-link>
+            <router-link
+                :to="'/ledger/' + entry.id + '/invoice'"
+                class="no-underline"
+              >
+            <ion-button>Invoice</ion-button>
+            </router-link>
           </ion-col>
         </ion-row>
       </ion-grid>
