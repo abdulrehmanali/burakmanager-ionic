@@ -124,7 +124,7 @@ import { trash, pencil, arrowDown, arrowUp, printOutline } from "ionicons/icons"
 import { getLedgerEntry } from "@/services/ledger.services";
 import { useRoute } from "vue-router";
 import { Storage } from "@ionic/storage";
-// import html2pdf from 'html2pdf.js'
+import html2pdf from 'html2pdf.js'
 
 
 export default {
@@ -183,7 +183,13 @@ export default {
     });
 
     const print = () => {
-      // html2pdf(document.getElementById('element-to-convert'));
+      html2pdf(document.getElementById('container'),{
+					margin: 1,
+					filename: `invoice #`+state.entry.id+`.pdf`,
+					image: { type: 'jpeg', quality: 0.98 },
+					html2canvas: { dpi: 192, letterRendering: true },
+					jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+				});
     }
 
     onIonViewWillLeave(() => {
@@ -213,8 +219,12 @@ export default {
     border: 1px solid black;
 }
 @media (prefers-color-scheme: dark) {
-  .products-table ion-col{
-    border: 1px solid white;
+  .container {
+    background-color: white;
+    color: black;
   }
+  /* .products-table ion-col{
+    border: 1px solid white;
+  } */
 }
 </style>

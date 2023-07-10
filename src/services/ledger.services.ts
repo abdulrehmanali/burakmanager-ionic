@@ -31,6 +31,18 @@ export const getLedgerEntry = async (id: any)=>{
     } 
   });
 }
+export const getLedgerInvoice = async (id: any)=>{
+  store.create();
+  const token = await store.get('token');
+  let selectedShop = await store.get('selectedShop');
+  selectedShop = JSON.parse(selectedShop);
+  return axios.get(baseUrl+'shops/'+(selectedShop['shop']['id'])+'/ledger/'+id+'/invoice',{
+    headers: {
+      'Authorization': token
+    },
+    responseType: 'blob'
+  });
+}
 export const deleteLedgerEntry = async (id: any)=>{
   store.create();
   const token = await store.get('token');

@@ -94,12 +94,7 @@
               >
             <ion-button>View</ion-button>
             </router-link>
-            <router-link
-                :to="'/ledger/' + entry.id + '/invoice'"
-                class="no-underline"
-              >
-            <ion-button>Invoice</ion-button>
-            </router-link>
+            <ion-button @click="printInvoice(entry.id)">Invoice</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -166,6 +161,7 @@ import { add, search, print } from "ionicons/icons";
 import { reactive, toRefs } from "@vue/reactivity";
 import {
   allLedgerEntries,
+  getLedgerInvoice,
   getReciptHtml,
   getReciptUrl,
 } from "@/services/ledger.services";
@@ -247,10 +243,22 @@ export default {
           console.log(err);
         });
     }
+    const printInvoice = (id: any) => {
+      getLedgerInvoice(id).then((res) => {
+          state.loading = false;
+          console.log(res)
+          const blob = new Blob([res.data], { type: 'application/pdf' })
+          const url = window.URL.createObjectURL(blob)
+          window.open(url)
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
     onIonViewWillEnter(() => {
       getLedger();
     });
-    return { ...toRefs(state), openPdf, router, add, search, print, openAdvanceSearchModal, getLedger, printResults};
+    return { ...toRefs(state), openPdf, router, add, search, print, openAdvanceSearchModal, getLedger, printResults, printInvoice};
   },
   components: {
     IonContent,
