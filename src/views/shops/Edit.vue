@@ -138,7 +138,7 @@
                 <ion-col size="12">
                   <ion-item>
                     <ion-label>{{invitation.email}}</ion-label>
-                    <ion-button @click="onClickdeleteInvitation(invitation)" color="danger" :disabled="invitation.disabledDeleteButton === true">Delete</ion-button>
+                    <ion-button @click="onClickDeleteInvitation(invitation)" color="danger" :disabled="invitation.disabledDeleteButton === true">Delete</ion-button>
                   </ion-item>
                 </ion-col>
               </ion-row>
@@ -187,6 +187,7 @@
             </ion-grid>
           </ion-card-content>
         </ion-card>
+        <webhook-container></webhook-container>
         <ion-card>
           <ion-card-content v-if="errorMsg" class="error-message">
             {{ errorMsg }}
@@ -207,6 +208,7 @@ import { update, get } from "@/services/shops.services";
 import { deleteInvitation } from "@/services/invitations.services";
 import currencyOptions from "@/data/currency-details.json";
 import { checkmark, close } from "ionicons/icons";
+import WebhookContainer from '../components/webhook/WebhookContainer.vue';
 
 export default {
   name: "EditShop",
@@ -279,14 +281,14 @@ export default {
         }
       }
     }
-    const manageDeleteInvatationState = (invitation: any, isDisabled: boolean) => {
+    const manageDeleteInvitationState = (invitation: any, isDisabled: boolean) => {
       for (let i = 0; i < state.invitations.length; i++) {
         if(state.invitations[i].id == invitation.id){
           state.invitations[i].disabledDeleteButton = isDisabled
         }
       }
     }
-    const onClickdeleteInvitation = (invitation: any)=>{
+    const onClickDeleteInvitation = (invitation: any)=>{
       if(!confirm('Are you sure you want to delete the invite?')){
         return;
       }
@@ -294,16 +296,16 @@ export default {
         deleteInvitationFromState(invitation)
         return
       }
-      manageDeleteInvatationState(invitation,true)
+      manageDeleteInvitationState(invitation,true)
       deleteInvitation(invitation.id).then(res=>{
         if(res.data.success) {
           deleteInvitationFromState(invitation);
         }else{
-           manageDeleteInvatationState(invitation,false)
+           manageDeleteInvitationState(invitation,false)
         }
       }).catch(err=>{
         alert("Unable to delete invitaion. Please check your internet.");
-        manageDeleteInvatationState(invitation,false)
+        manageDeleteInvitationState(invitation,false)
       })
     }
 
@@ -314,7 +316,7 @@ export default {
       openShopInvitationsModal,
       checkmark,
       close,
-      onClickdeleteInvitation
+      onClickDeleteInvitation
     };
   },
   components: {
@@ -322,6 +324,7 @@ export default {
     IonPage,
     IonBackButton,
     IonSelect,
+    WebhookContainer,
   },
 };
 </script>

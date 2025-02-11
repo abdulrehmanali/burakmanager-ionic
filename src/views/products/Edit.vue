@@ -286,6 +286,7 @@ import { useRoute } from "vue-router";
 import { getProduct, updateProduct } from "@/services/products.services";
 import SelectCustomerMode from "../components/models/SelectCustomerMode.vue";
 import { emitter } from "@/services/emitter";
+import WebhookContainer from '../components/webhook/WebhookContainer.vue';
 
 let selectCustomerModelVue: any;
 export default {
@@ -294,7 +295,7 @@ export default {
     IonContent,
     IonPage,
     IonBackButton,
-    IonSelect,
+    IonSelect
   },
   setup() {
     const route = useRoute();
