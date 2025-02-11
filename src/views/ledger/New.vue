@@ -13,6 +13,8 @@
         <ion-card>
           <ion-card-content>
             <ion-item lines="none">
+              <CreditDebitToggle />
+
               <ion-label>Entry Type</ion-label>
               <ion-select
                 v-model="type"
@@ -375,6 +377,7 @@ import { trash, pencil, arrowDown, arrowUp } from "ionicons/icons";
 import { createLedgerEntry } from "@/services/ledger.services";
 import { allCustomers } from "@/services/customers.services";
 import { allProducts } from "@/services/products.services";
+import CreditDebitToggle from "@/views/components/ledger/CreditDebitToggle.vue";
 
 export default {
   name: "NewProduct",
@@ -384,6 +387,7 @@ export default {
     IonBackButton,
     IonInput,
     IonSelect,
+    CreditDebitToggle
   },
   setup() {
     const state = reactive({

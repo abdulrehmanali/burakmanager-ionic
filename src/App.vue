@@ -371,7 +371,7 @@ ion-menu.ios ion-note {
 ion-menu.ios ion-item {
   --padding-start: 16px;
   --padding-end: 16px;
-  --min-height: 50px;
+  --min-height: 32px;
 }
 
 ion-menu.ios ion-item.selected ion-icon {
