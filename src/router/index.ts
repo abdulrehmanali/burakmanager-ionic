@@ -99,6 +99,11 @@ const routes: Array<RouteRecordRaw> = [
     meta:{haveSideBar:true,requiresAuth:true}
   },
   {
+    path: '/ledger/new-quick',
+    component: () => import ('../views/ledger/NewQuick.vue'),
+    meta:{haveSideBar:true,requiresAuth:true}
+  },
+  {
     path: '/ledger/:id',
     component: () => import ('../views/ledger/Edit.vue'),
     meta:{haveSideBar:true,requiresAuth:true}
